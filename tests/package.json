@@ -1,0 +1,22 @@
+{
+  "name": "aiops-integration-tests",
+  "version": "1.0.0",
+  "description": "Integration tests for AIOps Learning Platform",
+  "scripts": {
+    "test": "jest",
+    "test:docker": "jest docker-integration.test.js",
+    "test:observability": "jest observability-integration.test.js",
+    "test:grafana": "jest grafana-dashboard.test.js",
+    "test:watch": "jest --watch",
+    "test:all": "jest --runInBand"
+  },
+  "devDependencies": {
+    "jest": "^29.6.1",
+    "axios": "^1.4.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testTimeout": 60000,
+    "verbose": true
+  }
+}

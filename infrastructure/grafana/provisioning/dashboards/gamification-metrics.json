@@ -1,0 +1,168 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Gamification & Engagement Metrics",
+    "tags": ["aiops", "gamification", "engagement"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Real-time Leaderboard",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "topk(20, aiops_user_total_points)",
+            "legendFormat": "{{user_id}}",
+            "refId": "A",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "displayMode": "list",
+              "filterable": true
+            }
+          }
+        },
+        "gridPos": {"h": 12, "w": 8, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Badge Earning Timeline",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "increase(aiops_badges_earned_total[1h])",
+            "legendFormat": "{{badge_type}}",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {"label": "Badges Earned", "min": 0},
+          {"show": false}
+        ],
+        "gridPos": {"h": 6, "w": 16, "x": 8, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Points Distribution",
+        "type": "histogram",
+        "targets": [
+          {
+            "expr": "aiops_user_total_points",
+            "legendFormat": "Points",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 8, "x": 8, "y": 6}
+      },
+      {
+        "id": 4,
+        "title": "Engagement Score Heatmap",
+        "type": "heatmap",
+        "targets": [
+          {
+            "expr": "aiops_engagement_score",
+            "legendFormat": "Engagement",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 8, "x": 16, "y": 6}
+      },
+      {
+        "id": 5,
+        "title": "Leaderboard Position Changes",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(aiops_leaderboard_position_changes[5m])",
+            "legendFormat": "Position Changes/min",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {"label": "Changes per minute", "min": 0},
+          {"show": false}
+        ],
+        "gridPos": {"h": 6, "w": 8, "x": 0, "y": 12}
+      },
+      {
+        "id": 6,
+        "title": "Badge Types Distribution",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum(aiops_badges_earned_total) by (badge_type)",
+            "legendFormat": "{{badge_type}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 8, "x": 8, "y": 12}
+      },
+      {
+        "id": 7,
+        "title": "Streak Statistics",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "max(aiops_user_current_streak)",
+            "legendFormat": "Longest Current Streak",
+            "refId": "A"
+          },
+          {
+            "expr": "avg(aiops_user_current_streak)",
+            "legendFormat": "Average Streak",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        },
+        "gridPos": {"h": 6, "w": 8, "x": 16, "y": 12}
+      },
+      {
+        "id": 8,
+        "title": "Daily Active Users",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "aiops_daily_active_users",
+            "legendFormat": "DAU",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {"label": "Active Users", "min": 0},
+          {"show": false}
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 18}
+      },
+      {
+        "id": 9,
+        "title": "Achievement Unlock Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(aiops_achievements_unlocked_total[1h])",
+            "legendFormat": "{{achievement_type}}",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {"label": "Unlocks per hour", "min": 0},
+          {"show": false}
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 18}
+      }
+    ]
+  }
+}

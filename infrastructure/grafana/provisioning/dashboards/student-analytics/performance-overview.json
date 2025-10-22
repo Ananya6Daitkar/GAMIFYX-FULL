@@ -1,0 +1,167 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Student Performance Analytics",
+    "tags": ["aiops", "students", "performance"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "1m",
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "templating": {
+      "list": [
+        {
+          "name": "student_id",
+          "type": "query",
+          "query": "label_values(aiops_student_risk_score, user_id)",
+          "refresh": 1,
+          "includeAll": true,
+          "allValue": ".*",
+          "multi": true
+        }
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Student Risk Score Distribution",
+        "type": "heatmap",
+        "targets": [
+          {
+            "expr": "aiops_student_risk_score",
+            "legendFormat": "Risk Score",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Submission Activity Heatmap",
+        "type": "heatmap",
+        "targets": [
+          {
+            "expr": "increase(aiops_submission_total[1h])",
+            "legendFormat": "Submissions per Hour",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Top Performers (Points)",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "topk(10, aiops_user_total_points)",
+            "legendFormat": "{{user_id}}",
+            "refId": "A",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "displayMode": "list"
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 8, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "At-Risk Students",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "aiops_student_risk_score > 0.7",
+            "legendFormat": "{{user_id}}",
+            "refId": "A",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "yellow", "value": 0.7},
+                {"color": "red", "value": 0.9}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 8, "x": 8, "y": 8}
+      },
+      {
+        "id": 5,
+        "title": "Badge Distribution",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum(aiops_badges_earned_total) by (badge_type)",
+            "legendFormat": "{{badge_type}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 8}
+      },
+      {
+        "id": 6,
+        "title": "Submission Success Rate by Student",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "aiops_submission_success_rate{user_id=~\"$student_id\"}",
+            "legendFormat": "{{user_id}}",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {"label": "Success Rate %", "min": 0, "max": 100},
+          {"show": false}
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 7,
+        "title": "Code Quality Trends",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "avg_over_time(aiops_code_quality_score{user_id=~\"$student_id\"}[1h])",
+            "legendFormat": "{{user_id}} - Quality Score",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {"label": "Quality Score", "min": 0, "max": 100},
+          {"show": false}
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+      },
+      {
+        "id": 8,
+        "title": "Engagement Score Over Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "aiops_engagement_score{user_id=~\"$student_id\"}",
+            "legendFormat": "{{user_id}}",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {"label": "Engagement Score", "min": 0, "max": 100},
+          {"show": false}
+        ],
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 24}
+      }
+    ]
+  }
+}

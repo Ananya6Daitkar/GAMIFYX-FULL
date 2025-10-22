@@ -1,0 +1,333 @@
+{
+  "summary": {
+    "title": "GamifyX AIOps Learning Platform - Threat Model",
+    "owner": "Security Team",
+    "description": "Comprehensive threat model for the GamifyX cyberpunk-themed AIOps learning platform",
+    "id": "gamifyx-threat-model-2024"
+  },
+  "detail": {
+    "contributors": [
+      {
+        "name": "Security Architect"
+      },
+      {
+        "name": "Platform Engineer"
+      },
+      {
+        "name": "DevOps Engineer"
+      }
+    ],
+    "diagrams": [
+      {
+        "id": "main-architecture",
+        "title": "GamifyX Main Architecture",
+        "diagramType": "STRIDE",
+        "placeholder": "Main architecture diagram",
+        "thumbnail": "./diagrams/main-architecture.jpg",
+        "version": "2.1.0",
+        "cells": [
+          {
+            "position": {
+              "x": 100,
+              "y": 100
+            },
+            "size": {
+              "width": 160,
+              "height": 80
+            },
+            "shape": "trust-boundary-box",
+            "id": "internet-boundary",
+            "zIndex": 1,
+            "data": {
+              "type": "tm.BoundaryBox",
+              "name": "Internet Boundary",
+              "description": "External internet boundary"
+            }
+          },
+          {
+            "position": {
+              "x": 300,
+              "y": 150
+            },
+            "size": {
+              "width": 120,
+              "height": 60
+            },
+            "shape": "actor",
+            "id": "student-actor",
+            "zIndex": 2,
+            "data": {
+              "type": "tm.Actor",
+              "name": "Student",
+              "description": "Student using the GamifyX platform",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "id": "threat-001",
+                  "title": "Account Takeover",
+                  "type": "Spoofing",
+                  "status": "Open",
+                  "severity": "High",
+                  "description": "Attacker gains unauthorized access to student account",
+                  "mitigation": "Implement MFA, strong password policies, and account lockout mechanisms",
+                  "modelType": "STRIDE"
+                },
+                {
+                  "id": "threat-002",
+                  "title": "Session Hijacking",
+                  "type": "Spoofing",
+                  "status": "Open",
+                  "severity": "Medium",
+                  "description": "Attacker intercepts and uses student session tokens",
+                  "mitigation": "Use secure session management, HTTPS only, and short session timeouts",
+                  "modelType": "STRIDE"
+                }
+              ]
+            }
+          },
+          {
+            "position": {
+              "x": 300,
+              "y": 250
+            },
+            "size": {
+              "width": 120,
+              "height": 60
+            },
+            "shape": "actor",
+            "id": "teacher-actor",
+            "zIndex": 2,
+            "data": {
+              "type": "tm.Actor",
+              "name": "Teacher",
+              "description": "Teacher using the GamifyX platform",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "id": "threat-003",
+                  "title": "Privilege Escalation",
+                  "type": "Elevation of Privilege",
+                  "status": "Open",
+                  "severity": "High",
+                  "description": "Teacher gains unauthorized admin privileges",
+                  "mitigation": "Implement strict RBAC, regular permission audits, and principle of least privilege",
+                  "modelType": "STRIDE"
+                },
+                {
+                  "id": "threat-004",
+                  "title": "Student Data Exposure",
+                  "type": "Information Disclosure",
+                  "status": "Open",
+                  "severity": "High",
+                  "description": "Teacher accesses student data beyond their scope",
+                  "mitigation": "Implement data access controls and audit logging",
+                  "modelType": "STRIDE"
+                }
+              ]
+            }
+          },
+          {
+            "position": {
+              "x": 500,
+              "y": 200
+            },
+            "size": {
+              "width": 140,
+              "height": 80
+            },
+            "shape": "process",
+            "id": "api-gateway-process",
+            "zIndex": 2,
+            "data": {
+              "type": "tm.Process",
+              "name": "API Gateway",
+              "description": "Main API gateway with load balancing and circuit breakers",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "id": "threat-005",
+                  "title": "DDoS Attack",
+                  "type": "Denial of Service",
+                  "status": "Open",
+                  "severity": "High",
+                  "description": "Overwhelming the API gateway with requests",
+                  "mitigation": "Implement rate limiting, DDoS protection, and auto-scaling",
+                  "modelType": "STRIDE"
+                },
+                {
+                  "id": "threat-006",
+                  "title": "API Injection",
+                  "type": "Tampering",
+                  "status": "Open",
+                  "severity": "High",
+                  "description": "Malicious payloads injected through API endpoints",
+                  "mitigation": "Input validation, parameterized queries, and WAF protection",
+                  "modelType": "STRIDE"
+                }
+              ]
+            }
+          },
+          {
+            "position": {
+              "x": 700,
+              "y": 150
+            },
+            "size": {
+              "width": 120,
+              "height": 60
+            },
+            "shape": "process",
+            "id": "user-service-process",
+            "zIndex": 2,
+            "data": {
+              "type": "tm.Process",
+              "name": "User Service",
+              "description": "User authentication and profile management",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "id": "threat-007",
+                  "title": "Password Brute Force",
+                  "type": "Spoofing",
+                  "status": "Open",
+                  "severity": "Medium",
+                  "description": "Automated password guessing attacks",
+                  "mitigation": "Account lockout, CAPTCHA, and strong password policies",
+                  "modelType": "STRIDE"
+                }
+              ]
+            }
+          },
+          {
+            "position": {
+              "x": 700,
+              "y": 250
+            },
+            "size": {
+              "width": 120,
+              "height": 60
+            },
+            "shape": "process",
+            "id": "gamification-service-process",
+            "zIndex": 2,
+            "data": {
+              "type": "tm.Process",
+              "name": "Gamification Service",
+              "description": "Points, badges, and leaderboard management",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "id": "threat-008",
+                  "title": "Points Manipulation",
+                  "type": "Tampering",
+                  "status": "Open",
+                  "severity": "Medium",
+                  "description": "Unauthorized modification of user points or badges",
+                  "mitigation": "Cryptographic signatures, audit trails, and validation checks",
+                  "modelType": "STRIDE"
+                }
+              ]
+            }
+          },
+          {
+            "position": {
+              "x": 900,
+              "y": 200
+            },
+            "size": {
+              "width": 120,
+              "height": 60
+            },
+            "shape": "store",
+            "id": "postgresql-store",
+            "zIndex": 2,
+            "data": {
+              "type": "tm.Store",
+              "name": "PostgreSQL Database",
+              "description": "Primary database storing user data, submissions, and gamification data",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "id": "threat-009",
+                  "title": "SQL Injection",
+                  "type": "Tampering",
+                  "status": "Open",
+                  "severity": "High",
+                  "description": "Malicious SQL queries to access or modify data",
+                  "mitigation": "Parameterized queries, ORM usage, and input validation",
+                  "modelType": "STRIDE"
+                },
+                {
+                  "id": "threat-010",
+                  "title": "Database Breach",
+                  "type": "Information Disclosure",
+                  "status": "Open",
+                  "severity": "Critical",
+                  "description": "Unauthorized access to sensitive student and educational data",
+                  "mitigation": "Encryption at rest, access controls, and network segmentation",
+                  "modelType": "STRIDE"
+                }
+              ]
+            }
+          },
+          {
+            "position": {
+              "x": 700,
+              "y": 350
+            },
+            "size": {
+              "width": 120,
+              "height": 60
+            },
+            "shape": "process",
+            "id": "ai-service-process",
+            "zIndex": 2,
+            "data": {
+              "type": "tm.Process",
+              "name": "AI Feedback Service",
+              "description": "AI-powered code analysis and feedback generation",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "id": "threat-011",
+                  "title": "Model Poisoning",
+                  "type": "Tampering",
+                  "status": "Open",
+                  "severity": "Medium",
+                  "description": "Malicious training data affecting AI model behavior",
+                  "mitigation": "Data validation, model versioning, and anomaly detection",
+                  "modelType": "STRIDE"
+                },
+                {
+                  "id": "threat-012",
+                  "title": "AI Bias Exploitation",
+                  "type": "Information Disclosure",
+                  "status": "Open",
+                  "severity": "Medium",
+                  "description": "Exploiting AI model biases to gain unfair advantages",
+                  "mitigation": "Bias testing, diverse training data, and fairness metrics",
+                  "modelType": "STRIDE"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "reviewer": "Security Team Lead"
+  }
+}

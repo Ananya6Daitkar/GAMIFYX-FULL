@@ -1,0 +1,38 @@
+{
+  "name": "gamifyx-demo-tests",
+  "version": "1.0.0",
+  "description": "Comprehensive demo validation tests for GamifyX AIOps Learning Platform",
+  "scripts": {
+    "test": "mocha comprehensive-demo-validation.test.js --timeout 60000",
+    "test:quick": "mocha comprehensive-demo-validation.test.js --timeout 30000 --grep 'Core Platform'",
+    "test:competition": "mocha comprehensive-demo-validation.test.js --timeout 60000 --grep 'Competition'",
+    "test:gamification": "mocha comprehensive-demo-validation.test.js --timeout 60000 --grep 'Gamification'",
+    "test:security": "mocha comprehensive-demo-validation.test.js --timeout 60000 --grep 'Security'",
+    "test:all": "mocha '*.test.js' --timeout 60000"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "chai": "^4.3.10",
+    "mocha": "^10.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.50.0"
+  },
+  "mocha": {
+    "timeout": 60000,
+    "reporter": "spec",
+    "recursive": true
+  },
+  "keywords": [
+    "demo",
+    "validation",
+    "testing",
+    "gamifyx",
+    "aiops",
+    "education",
+    "competition",
+    "gamification"
+  ],
+  "author": "GamifyX Team",
+  "license": "MIT"
+}

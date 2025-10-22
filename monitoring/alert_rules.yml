@@ -1,0 +1,353 @@
+# Prometheus Alert Rules for GamifyX AIOps Learning Platform
+
+groups:
+  - name: gamifyx.system.alerts
+    rules:
+      # High CPU Usage Alert
+      - alert: HighCPUUsage
+        expr: (100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+          platform: gamifyx
+        annotations:
+          summary: "High CPU usage detected on {{ $labels.instance }}"
+          description: "CPU usage is above 80% for more than 5 minutes on {{ $labels.instance }}. Current value: {{ $value }}%"
+
+      # High Memory Usage Alert
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+          platform: gamifyx
+        annotations:
+          summary: "High memory usage detected on {{ $labels.instance }}"
+          description: "Memory usage is above 85% for more than 5 minutes on {{ $labels.instance }}. Current value: {{ $value }}%"
+
+  - name: gamifyx.services.alerts
+    rules:
+      # Service Down Alert
+      - alert: ServiceDown
+        expr: up{job=~"api-gateway|user-service|gamification-service|analytics-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: "{{ $labels.job }}"
+          platform: gamifyx
+        annotations:
+          summary: "GamifyX service {{ $labels.job }} is down"
+          description: "Service {{ $labels.job }} has been down for more than 1 minute"
+
+      # High Response Time Alert
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=~"api-gateway|user-service|gamification-service"}[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: "{{ $labels.job }}"
+          platform: gamifyx
+        annotations:
+          summary: "High response time for {{ $labels.job }}"
+          description: "95th percentile response time is above 1 second for {{ $labels.job }}. Current value: {{ $value }}s"
+
+  - name: gamifyx.application.alerts
+    rules:
+      # AI Service Alerts
+      - alert: AIFeedbackServiceDown
+        expr: up{job="ai-feedback-service"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: ai-feedback
+          platform: gamifyx
+        annotations:
+          summary: "AI Feedback service is down"
+          description: "AI Feedback service has been down for more than 2 minutes"
+
+  # GamifyX Student Engagement Alerts
+  - name: gamifyx.engagement.alerts
+    rules:
+      - alert: LowStudentEngagement
+        expr: avg(gamifyx_engagement_score) < 60
+        for: 5m
+        labels:
+          severity: warning
+          category: engagement
+          platform: gamifyx
+        annotations:
+          summary: "Low student engagement detected"
+          description: "Average engagement score has dropped to {{ $value }}%"
+          action: "Review recent activities and consider intervention strategies"
+          dashboard_url: "http://grafana:3000/d/gamifyx-engagement"
+
+      - alert: HighRiskStudentCount
+        expr: sum(gamifyx_at_risk_students) > 10
+        for: 2m
+        labels:
+          severity: critical
+          category: student_risk
+          platform: gamifyx
+        annotations:
+          summary: "High number of at-risk students"
+          description: "{{ $value }} students are currently at risk"
+          action: "Immediate teacher intervention required"
+          dashboard_url: "http://grafana:3000/d/gamifyx-engagement"
+
+      - alert: EngagementDropAlert
+        expr: (avg(gamifyx_engagement_score) - avg(gamifyx_engagement_score offset 1h)) / avg(gamifyx_engagement_score offset 1h) < -0.2
+        for: 3m
+        labels:
+          severity: warning
+          category: engagement_trend
+          platform: gamifyx
+        annotations:
+          summary: "Significant engagement drop detected"
+          description: "Engagement has dropped by {{ $value | humanizePercentage }} in the last hour"
+          dashboard_url: "http://grafana:3000/d/gamifyx-engagement"
+
+      - alert: StudentRiskScoreSpike
+        expr: max(gamifyx_student_risk_score) > 0.9
+        for: 1m
+        labels:
+          severity: critical
+          category: student_risk
+          platform: gamifyx
+        annotations:
+          summary: "Student with very high risk score detected"
+          description: "A student has a risk score of {{ $value | humanizePercentage }}"
+          action: "Immediate intervention required"
+          dashboard_url: "http://grafana:3000/d/gamifyx-engagement"
+
+  # GamifyX Gamification System Alerts
+  - name: gamifyx.gamification.alerts
+    rules:
+      - alert: LeaderboardStale
+        expr: time() - gamifyx_leaderboard_last_update > 300
+        for: 1m
+        labels:
+          severity: warning
+          category: gamification
+          platform: gamifyx
+        annotations:
+          summary: "Leaderboard data is stale"
+          description: "Leaderboard hasn't been updated for {{ $value }} seconds"
+          dashboard_url: "http://grafana:3000/d/gamifyx-leaderboard"
+
+      - alert: BadgeSystemDown
+        expr: rate(gamifyx_badges_earned_total[5m]) == 0 and gamifyx_active_users > 10
+        for: 5m
+        labels:
+          severity: critical
+          category: gamification
+          platform: gamifyx
+        annotations:
+          summary: "Badge system appears to be down"
+          description: "No badges have been earned despite {{ $value }} active users"
+          dashboard_url: "http://grafana:3000/d/gamifyx-badge-analytics"
+
+      - alert: AchievementSystemFailure
+        expr: rate(gamifyx_achievements_unlocked_total[10m]) == 0 and rate(gamifyx_submissions_total[10m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          category: gamification
+          platform: gamifyx
+        annotations:
+          summary: "Achievement system may be failing"
+          description: "No achievements unlocked despite active submissions"
+          dashboard_url: "http://grafana:3000/d/gamifyx-leaderboard"
+
+      - alert: PointsSystemAnomaly
+        expr: abs(rate(gamifyx_points_earned_total[5m]) - rate(gamifyx_points_earned_total[5m] offset 1h)) / rate(gamifyx_points_earned_total[5m] offset 1h) > 0.5
+        for: 3m
+        labels:
+          severity: warning
+          category: gamification
+          platform: gamifyx
+        annotations:
+          summary: "Unusual points earning pattern detected"
+          description: "Points earning rate has changed significantly from normal patterns"
+          dashboard_url: "http://grafana:3000/d/gamifyx-leaderboard"
+
+  # GamifyX AI/ML Model Performance Alerts
+  - name: gamifyx.ai.alerts
+    rules:
+      - alert: ModelAccuracyDrop
+        expr: avg(ai_model_accuracy) < 0.8
+        for: 5m
+        labels:
+          severity: warning
+          category: ai_performance
+          platform: gamifyx
+        annotations:
+          summary: "AI model accuracy has dropped"
+          description: "Average model accuracy is {{ $value | humanizePercentage }}"
+          action: "Review model performance and consider retraining"
+          dashboard_url: "http://grafana:3000/d/ai-insights"
+
+      - alert: HighInferenceLatency
+        expr: avg(ai_inference_duration_ms) > 1000
+        for: 3m
+        labels:
+          severity: warning
+          category: ai_performance
+          platform: gamifyx
+        annotations:
+          summary: "High AI inference latency"
+          description: "Average inference time is {{ $value }}ms"
+          dashboard_url: "http://grafana:3000/d/ai-insights"
+
+      - alert: PredictionServiceDown
+        expr: up{job="ai-feedback-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: ai_service
+          platform: gamifyx
+        annotations:
+          summary: "AI prediction service is down"
+          description: "AI feedback service is not responding"
+          dashboard_url: "http://grafana:3000/d/ai-insights"
+
+      - alert: ModelPredictionFailures
+        expr: rate(ai_prediction_failures_total[5m]) > 0.1
+        for: 3m
+        labels:
+          severity: warning
+          category: ai_reliability
+          platform: gamifyx
+        annotations:
+          summary: "High AI prediction failure rate"
+          description: "{{ $value }} prediction failures per second"
+          dashboard_url: "http://grafana:3000/d/ai-insights"
+
+  # GamifyX Teacher Dashboard Alerts
+  - name: gamifyx.teacher.alerts
+    rules:
+      - alert: TeacherInterventionBacklog
+        expr: sum(gamifyx_pending_interventions) > 5
+        for: 10m
+        labels:
+          severity: warning
+          category: teacher_workflow
+          platform: gamifyx
+        annotations:
+          summary: "High number of pending interventions"
+          description: "{{ $value }} interventions are pending teacher action"
+          action: "Teachers should review and process pending interventions"
+
+      - alert: UnacknowledgedAlerts
+        expr: sum(gamifyx_unacknowledged_alerts) > 3
+        for: 5m
+        labels:
+          severity: warning
+          category: teacher_workflow
+          platform: gamifyx
+        annotations:
+          summary: "Multiple unacknowledged alerts"
+          description: "{{ $value }} alerts require teacher attention"
+          action: "Teachers should acknowledge and address pending alerts"
+
+      - alert: TeacherDashboardDown
+        expr: up{job="teacher-dashboard"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          category: teacher_tools
+          platform: gamifyx
+        annotations:
+          summary: "Teacher dashboard is unavailable"
+          description: "Teacher dashboard service has been down for more than 2 minutes"
+
+  # GamifyX Business Logic Alerts
+  - name: gamifyx.business.alerts
+    rules:
+      - alert: SubmissionProcessingDelay
+        expr: avg(gamifyx_submission_processing_time) > 300
+        for: 5m
+        labels:
+          severity: warning
+          category: business_logic
+          platform: gamifyx
+        annotations:
+          summary: "Submission processing is slow"
+          description: "Average processing time is {{ $value }} seconds"
+          action: "Check submission processing pipeline for bottlenecks"
+
+      - alert: FeedbackGenerationFailure
+        expr: rate(gamifyx_feedback_generation_failures_total[5m]) > 0.1
+        for: 3m
+        labels:
+          severity: warning
+          category: business_logic
+          platform: gamifyx
+        annotations:
+          summary: "High feedback generation failure rate"
+          description: "{{ $value }} feedback generation failures per second"
+          dashboard_url: "http://grafana:3000/d/ai-insights"
+
+      - alert: CompetitionDeadlineApproaching
+        expr: (gamifyx_competition_deadline - time()) < 86400 and (gamifyx_competition_deadline - time()) > 0
+        for: 1m
+        labels:
+          severity: info
+          category: competition
+          platform: gamifyx
+        annotations:
+          summary: "Competition deadline approaching"
+          description: "Competition deadline is in {{ $value | humanizeDuration }}"
+          action: "Notify students about approaching deadline"
+
+      - alert: LowSubmissionRate
+        expr: rate(gamifyx_submissions_total[1h]) < 0.1
+        for: 30m
+        labels:
+          severity: warning
+          category: engagement
+          platform: gamifyx
+        annotations:
+          summary: "Low submission rate detected"
+          description: "Only {{ $value }} submissions per hour in the last hour"
+          action: "Check if students are facing technical issues or need motivation"
+
+  # GamifyX Security Alerts
+  - name: gamifyx.security.alerts
+    rules:
+      - alert: SuspiciousLoginActivity
+        expr: rate(gamifyx_failed_logins_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          category: security
+          platform: gamifyx
+        annotations:
+          summary: "High rate of failed login attempts"
+          description: "{{ $value }} failed login attempts per second"
+          action: "Investigate potential brute force attack"
+
+      - alert: UnauthorizedAPIAccess
+        expr: rate(http_requests_total{status_code="401"}[5m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+          category: security
+          platform: gamifyx
+        annotations:
+          summary: "High rate of unauthorized API access attempts"
+          description: "{{ $value }} unauthorized requests per second"
+          action: "Review API access patterns and security measures"
+
+      - alert: DataIntegrityIssue
+        expr: gamifyx_data_consistency_check_failures > 0
+        for: 1m
+        labels:
+          severity: critical
+          category: data_integrity
+          platform: gamifyx
+        annotations:
+          summary: "Data integrity check failed"
+          description: "{{ $value }} data consistency issues detected"
+          action: "Immediate investigation required - potential data corruption"

@@ -1,0 +1,248 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "AI Model Performance & Insights",
+    "tags": ["aiops", "ai", "ml", "insights"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Feedback Generation Performance",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(aiops_feedback_generation_duration_seconds_bucket[5m]))",
+            "legendFormat": "95th Percentile",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(aiops_feedback_generation_duration_seconds_bucket[5m]))",
+            "legendFormat": "50th Percentile",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {"label": "Duration (seconds)", "min": 0},
+          {"show": false}
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Model Prediction Accuracy",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "aiops_performance_prediction_accuracy * 100",
+            "legendFormat": "Accuracy %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 70},
+                {"color": "green", "value": 85}
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Feedback Implementation Rate",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "aiops_feedback_implementation_rate * 100",
+            "legendFormat": "Implementation Rate",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 40},
+                {"color": "green", "value": 70}
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0}
+      },
+      {
+        "id": 4,
+        "title": "Risk Score Distribution",
+        "type": "histogram",
+        "targets": [
+          {
+            "expr": "aiops_risk_score_distribution",
+            "legendFormat": "Risk Score",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 5,
+        "title": "Alert Generation Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(aiops_alert_generation_rate[5m])",
+            "legendFormat": "Alerts/min",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {"label": "Alerts per minute", "min": 0},
+          {"show": false}
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 6,
+        "title": "Code Analysis Metrics",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "avg(aiops_code_complexity_score)",
+            "legendFormat": "Avg Complexity",
+            "refId": "A"
+          },
+          {
+            "expr": "avg(aiops_security_score)",
+            "legendFormat": "Avg Security Score",
+            "refId": "B"
+          },
+          {
+            "expr": "avg(aiops_test_coverage_percentage)",
+            "legendFormat": "Avg Test Coverage",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {"label": "Score", "min": 0, "max": 100},
+          {"show": false}
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 7,
+        "title": "AI Service Health",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=\"ai-feedback-service\"}",
+            "legendFormat": "AI Service Status",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "green", "value": 1}
+              ]
+            },
+            "mappings": [
+              {"type": "value", "value": "0", "text": "DOWN"},
+              {"type": "value", "value": "1", "text": "UP"}
+            ]
+          }
+        },
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 16}
+      },
+      {
+        "id": 8,
+        "title": "Model Inference Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(aiops_model_inference_total[5m])",
+            "legendFormat": "Inferences/sec",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps"
+          }
+        },
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 16}
+      },
+      {
+        "id": 9,
+        "title": "Feedback Quality Ratings",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(aiops_feedback_quality_rating_bucket[5m]))",
+            "legendFormat": "95th Percentile Rating",
+            "refId": "A"
+          },
+          {
+            "expr": "avg(rate(aiops_feedback_quality_rating_sum[5m]) / rate(aiops_feedback_quality_rating_count[5m]))",
+            "legendFormat": "Average Rating",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {"label": "Rating (1-5)", "min": 1, "max": 5},
+          {"show": false}
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 20}
+      },
+      {
+        "id": 10,
+        "title": "Intervention Success Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "aiops_intervention_success_rate * 100",
+            "legendFormat": "Success Rate",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 50},
+                {"color": "green", "value": 75}
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 20}
+      }
+    ]
+  }
+}

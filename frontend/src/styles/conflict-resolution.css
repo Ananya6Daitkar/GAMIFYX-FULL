@@ -1,0 +1,376 @@
+/* CSS Conflict Resolution and Cleanup */
+
+/* ===== SCROLLBAR CONFLICTS RESOLUTION ===== */
+
+/* Override conflicting scrollbar styles from cyberpunk-animations.css */
+/* Use our custom scrollbar from overflow-fixes.css instead */
+::-webkit-scrollbar {
+  width: 6px !important;
+  height: 6px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-radius: 3px !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 255, 0.3) !important;
+  border-radius: 3px !important;
+  transition: background var(--transition-fast) !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 255, 0.5) !important;
+}
+
+/* ===== MUI THEME CONFLICTS RESOLUTION ===== */
+
+/* Resolve conflicts between MUI theme overrides and our component fixes */
+
+/* Card conflicts - prioritize our new system */
+.MuiCard-root {
+  background: var(--gradient-card) !important;
+  border: 1px solid rgba(0, 255, 255, 0.2) !important;
+  border-radius: var(--radius-xl) !important;
+  backdrop-filter: blur(var(--blur-lg)) !important;
+  box-shadow: var(--shadow-lg) !important;
+  transition: all var(--transition-normal) !important;
+}
+
+.MuiCard-root:hover {
+  transform: translateY(-2px) !important;
+  border-color: rgba(0, 255, 255, 0.4) !important;
+  box-shadow: var(--shadow-xl), 0 0 20px rgba(0, 255, 255, 0.1) !important;
+}
+
+/* Button conflicts - merge both systems */
+.MuiButton-root {
+  border-radius: var(--radius-lg) !important;
+  text-transform: none !important;
+  font-weight: var(--font-weight-semibold) !important;
+  letter-spacing: var(--letter-spacing-normal) !important;
+  transition: all var(--transition-normal) !important;
+  padding: var(--spacing-sm) var(--spacing-lg) !important;
+}
+
+.MuiButton-contained {
+  background: var(--gradient-button) !important;
+  box-shadow: 0 4px 20px rgba(0, 255, 255, 0.3) !important;
+  color: var(--color-background) !important;
+}
+
+.MuiButton-contained:hover {
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-secondary-light) 100%) !important;
+  box-shadow: 0 6px 25px rgba(0, 255, 255, 0.4) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Chip conflicts - use our system */
+.MuiChip-root {
+  border-radius: var(--radius-md) !important;
+  font-weight: var(--font-weight-medium) !important;
+  backdrop-filter: blur(var(--blur-sm)) !important;
+}
+
+.MuiChip-filled {
+  background: rgba(0, 255, 255, 0.2) !important;
+  color: var(--color-primary) !important;
+  border: 1px solid rgba(0, 255, 255, 0.3) !important;
+}
+
+/* ===== TYPOGRAPHY CONFLICTS RESOLUTION ===== */
+
+/* Resolve conflicts between MUI typography and our typography system */
+.MuiTypography-h1 {
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--font-size-4xl) !important;
+  font-weight: var(--font-weight-bold) !important;
+  line-height: var(--line-height-tight) !important;
+  letter-spacing: var(--letter-spacing-widest) !important;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5) !important;
+  text-align: left !important;
+}
+
+.MuiTypography-h2 {
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--font-size-3xl) !important;
+  font-weight: var(--font-weight-semibold) !important;
+  line-height: var(--line-height-tight) !important;
+  letter-spacing: var(--letter-spacing-wider) !important;
+  text-shadow: 0 0 8px rgba(0, 255, 255, 0.3) !important;
+  text-align: left !important;
+}
+
+.MuiTypography-h3 {
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--font-size-2xl) !important;
+  font-weight: var(--font-weight-semibold) !important;
+  line-height: var(--line-height-tight) !important;
+  letter-spacing: var(--letter-spacing-wide) !important;
+  text-align: left !important;
+}
+
+.MuiTypography-h4 {
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--font-size-xl) !important;
+  font-weight: var(--font-weight-medium) !important;
+  line-height: var(--line-height-normal) !important;
+  letter-spacing: var(--letter-spacing-normal) !important;
+  text-align: left !important;
+}
+
+.MuiTypography-h5 {
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--font-size-lg) !important;
+  font-weight: var(--font-weight-medium) !important;
+  line-height: var(--line-height-normal) !important;
+  text-align: left !important;
+}
+
+.MuiTypography-h6 {
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--font-size-base) !important;
+  font-weight: var(--font-weight-medium) !important;
+  line-height: var(--line-height-normal) !important;
+  text-align: left !important;
+}
+
+.MuiTypography-body1 {
+  font-family: var(--font-family-secondary) !important;
+  font-size: var(--font-size-base) !important;
+  line-height: var(--line-height-normal) !important;
+  text-align: left !important;
+}
+
+.MuiTypography-body2 {
+  font-family: var(--font-family-secondary) !important;
+  font-size: var(--font-size-sm) !important;
+  line-height: var(--line-height-normal) !important;
+  text-align: left !important;
+}
+
+/* ===== ANIMATION CONFLICTS RESOLUTION ===== */
+
+/* Ensure our animations don't conflict with existing cyberpunk animations */
+
+/* Preserve cyberpunk animations but ensure they don't break layout */
+.holographic,
+.glitch,
+.neon-border,
+.cyber-button,
+.data-stream,
+.hologram {
+  /* Ensure these don't cause overflow */
+  overflow: hidden !important;
+  max-width: 100% !important;
+}
+
+/* Ensure glitch effect doesn't break text alignment */
+.glitch::before,
+.glitch::after {
+  text-align: inherit !important;
+}
+
+/* ===== LAYOUT CONFLICTS RESOLUTION ===== */
+
+/* Resolve conflicts between old layout and new layout system */
+
+/* Override any conflicting positioning */
+.app-layout * {
+  box-sizing: border-box !important;
+}
+
+/* Ensure cyberpunk effects don't interfere with responsive layout */
+.matrix-rain {
+  pointer-events: none !important;
+  z-index: -10 !important;
+  position: fixed !important;
+  overflow: hidden !important;
+}
+
+/* ===== SPACING CONFLICTS RESOLUTION ===== */
+
+/* Resolve spacing conflicts between old and new systems */
+
+/* Ensure consistent padding in cards */
+.MuiCardContent-root {
+  padding: var(--spacing-lg) !important;
+}
+
+.MuiCardContent-root:last-child {
+  padding-bottom: var(--spacing-lg) !important;
+}
+
+/* ===== COLOR CONFLICTS RESOLUTION ===== */
+
+/* Ensure color consistency between theme and CSS variables */
+:root {
+  /* Sync with cyberpunkColors from theme */
+  --color-primary: #00FFFF;
+  --color-primary-light: #66FFFF;
+  --color-primary-dark: #00CCCC;
+  
+  --color-secondary: #FF0080;
+  --color-secondary-light: #FF66B3;
+  --color-secondary-dark: #CC0066;
+  
+  --color-background: #0A0A0F;
+  --color-surface: rgba(15, 15, 25, 0.8);
+  --color-surface-glass: rgba(255, 255, 255, 0.05);
+  --color-surface-glow: rgba(0, 255, 255, 0.1);
+  --color-surface-card: rgba(20, 20, 35, 0.9);
+  
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #B0B0B0;
+  --color-text-accent: #00FFFF;
+  
+  --color-success: #00FF88;
+  --color-warning: #FFB800;
+  --color-error: #FF3366;
+  
+  /* Sync gradients */
+  --gradient-primary: linear-gradient(135deg, #0A0A0F 0%, #1A1A2E 50%, #16213E 100%);
+  --gradient-card: linear-gradient(135deg, rgba(20, 20, 35, 0.9) 0%, rgba(30, 30, 50, 0.8) 100%);
+  --gradient-glow: linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, rgba(255, 0, 128, 0.1) 100%);
+  --gradient-button: linear-gradient(135deg, #00FFFF 0%, #FF0080 100%);
+}
+
+/* ===== RESPONSIVE CONFLICTS RESOLUTION ===== */
+
+/* Ensure cyberpunk effects work properly on mobile */
+@media (max-width: 767px) {
+  /* Reduce animation intensity on mobile for performance */
+  .holographic,
+  .glitch,
+  .neon-border,
+  .hologram {
+    animation-duration: 2s !important;
+  }
+  
+  /* Ensure effects don't cause horizontal scroll */
+  .neon-border::before {
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+  }
+}
+
+/* ===== Z-INDEX CONFLICTS RESOLUTION ===== */
+
+/* Ensure proper z-index layering */
+.matrix-rain {
+  z-index: -10 !important;
+}
+
+.glitch::before {
+  z-index: -1 !important;
+}
+
+.glitch::after {
+  z-index: -2 !important;
+}
+
+.neon-border::before {
+  z-index: -1 !important;
+}
+
+.app-sidebar {
+  z-index: var(--z-fixed) !important;
+}
+
+.sidebar-overlay {
+  z-index: var(--z-modal-backdrop) !important;
+}
+
+/* ===== PERFORMANCE OPTIMIZATION ===== */
+
+/* Optimize animations for better performance */
+.holographic,
+.glitch,
+.neon-border,
+.cyber-button,
+.data-stream,
+.hologram {
+  will-change: transform, opacity !important;
+  transform: translateZ(0) !important; /* Force hardware acceleration */
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .holographic,
+  .glitch,
+  .neon-border,
+  .cyber-button,
+  .data-stream,
+  .hologram {
+    animation: none !important;
+  }
+  
+  .glitch::before,
+  .glitch::after {
+    animation: none !important;
+  }
+}
+
+/* ===== ACCESSIBILITY CONFLICTS RESOLUTION ===== */
+
+/* Ensure accessibility isn't compromised by effects */
+.glitch,
+.hologram {
+  /* Ensure text remains readable */
+  color: var(--color-text-primary) !important;
+}
+
+.glitch::before,
+.glitch::after {
+  /* Reduce opacity for better readability */
+  opacity: 0.3 !important;
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: high) {
+  .holographic,
+  .glitch,
+  .neon-border,
+  .cyber-button,
+  .data-stream,
+  .hologram {
+    /* Disable effects in high contrast mode */
+    animation: none !important;
+    background: transparent !important;
+    border: 2px solid currentColor !important;
+  }
+  
+  .glitch::before,
+  .glitch::after {
+    display: none !important;
+  }
+}
+
+/* ===== FINAL CLEANUP ===== */
+
+/* Remove any remaining conflicts */
+* {
+  /* Ensure consistent box-sizing */
+  box-sizing: border-box !important;
+}
+
+/* Ensure no elements break the layout */
+*:not(.matrix-rain):not(.glitch::before):not(.glitch::after):not(.neon-border::before) {
+  max-width: 100% !important;
+}
+
+/* Force text alignment consistency */
+.text-left-force,
+.text-left-force *:not(.text-center-override):not(.text-center-override *) {
+  text-align: left !important;
+}
+
+/* Ensure proper overflow handling */
+.prevent-overflow,
+.prevent-overflow * {
+  overflow-x: hidden !important;
+  word-wrap: break-word !important;
+}

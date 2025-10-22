@@ -1,0 +1,794 @@
+version: '3.8'
+
+services:
+  # =============================================================================
+  # INFRASTRUCTURE SERVICES
+  # =============================================================================
+  
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: aiops-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: aiops_learning_platform
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./services/user-service/src/database/migrations:/docker-entrypoint-initdb.d/01-user-service
+      - ./services/secrets-manager/src/database/migrations:/docker-entrypoint-initdb.d/02-secrets-manager
+      - ./services/security-dashboard/src/database/migrations:/docker-entrypoint-initdb.d/03-security-dashboard
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aiops-network
+
+  # Redis for caching and sessions
+  redis:
+    image: redis:7-alpine
+    container_name: aiops-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aiops-network
+
+  # HashiCorp Vault for secrets management
+  vault:
+    image: hashicorp/vault:latest
+    container_name: aiops-vault
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: dev-token
+      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
+    cap_add:
+      - IPC_LOCK
+    command: vault server -dev -dev-root-token-id=dev-token
+    healthcheck:
+      test: ["CMD", "vault", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aiops-network
+
+  # =============================================================================
+  # MONITORING STACK
+  # =============================================================================
+
+  # Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: aiops-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - aiops-network
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: aiops-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_USER: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - aiops-network
+
+  # Jaeger for distributed tracing
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: aiops-jaeger
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+      - "14250:14250"
+    environment:
+      COLLECTOR_OTLP_ENABLED: true
+      SPAN_STORAGE_TYPE: memory
+    networks:
+      - aiops-network
+
+  # Loki for log aggregation
+  loki:
+    image: grafana/loki:latest
+    container_name: aiops-loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki_data:/loki
+    networks:
+      - aiops-network
+
+  # Tempo for distributed tracing storage
+  tempo:
+    image: grafana/tempo:latest
+    container_name: aiops-tempo
+    ports:
+      - "3200:3200"
+      - "4317:4317"  # OTLP gRPC receiver
+      - "4318:4318"  # OTLP HTTP receiver
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./infrastructure/tempo.yaml:/etc/tempo.yaml
+      - tempo_data:/tmp/tempo
+    networks:
+      - aiops-network
+
+  # OpenTelemetry Collector
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: aiops-otel-collector
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP HTTP receiver
+      - "8888:8888"   # Prometheus metrics
+      - "8889:8889"   # Prometheus exporter metrics
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./infrastructure/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    depends_on:
+      - jaeger
+      - prometheus
+      - loki
+      - tempo
+    networks:
+      - aiops-network
+
+  # InfluxDB for time-series data
+  influxdb:
+    image: influxdb:2.7
+    container_name: aiops-influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: password123
+      DOCKER_INFLUXDB_INIT_ORG: aiops
+      DOCKER_INFLUXDB_INIT_BUCKET: metrics
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: aiops-admin-token-for-development
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    networks:
+      - aiops-network
+
+  # =============================================================================
+  # CORE SERVICES
+  # =============================================================================
+
+  # User Service
+  user-service:
+    build:
+      context: ./services/user-service
+      dockerfile: Dockerfile
+    container_name: aiops-user-service
+    ports:
+      - "3001:3001"
+      - "9001:9001" # Metrics port
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      LOG_LEVEL: info
+      
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: aiops_learning_platform
+      DB_USER: postgres
+      DB_PASSWORD: password
+      DB_SSL: false
+      
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      
+      # JWT
+      JWT_SECRET: aiops-super-secret-jwt-key-for-development-only
+      JWT_REFRESH_SECRET: aiops-super-secret-refresh-key-for-development-only
+      JWT_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      
+      # Monitoring
+      METRICS_PORT: 9001
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      
+      # GamifyX Integration
+      GAMIFYX_ENABLED: true
+      WEBSOCKET_URL: ws://api-gateway:3000/ws
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aiops-network
+
+  # Submission Service
+  submission-service:
+    build:
+      context: ./services/submission-service
+      dockerfile: Dockerfile
+    container_name: aiops-submission-service
+    ports:
+      - "3002:3002"
+      - "9002:9002" # Metrics port
+    environment:
+      NODE_ENV: development
+      PORT: 3002
+      LOG_LEVEL: info
+      
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: aiops_learning_platform
+      DB_USER: postgres
+      DB_PASSWORD: password
+      DB_SSL: false
+      
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      
+      # JWT
+      JWT_SECRET: aiops-super-secret-jwt-key-for-development-only
+      
+      # GitHub Integration
+      GITHUB_CLIENT_ID: your-github-client-id
+      GITHUB_CLIENT_SECRET: your-github-client-secret
+      GITHUB_WEBHOOK_SECRET: your-webhook-secret
+      
+      # Monitoring
+      METRICS_PORT: 9002
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      
+      # GamifyX Integration
+      GAMIFYX_ENABLED: true
+      WEBSOCKET_URL: ws://api-gateway:3000/ws
+      AI_FEEDBACK_SERVICE_URL: http://ai-feedback-service:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aiops-network
+
+  # Gamification Service
+  gamification-service:
+    build:
+      context: ./services/gamification-service
+      dockerfile: Dockerfile
+    container_name: aiops-gamification-service
+    ports:
+      - "3005:3005"
+      - "9005:9005" # Metrics port
+    environment:
+      NODE_ENV: development
+      PORT: 3005
+      LOG_LEVEL: info
+      
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: aiops_learning_platform
+      DB_USER: postgres
+      DB_PASSWORD: password
+      DB_SSL: false
+      
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      
+      # JWT
+      JWT_SECRET: aiops-super-secret-jwt-key-for-development-only
+      
+      # Monitoring
+      METRICS_PORT: 9005
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      
+      # GamifyX Integration
+      GAMIFYX_ENABLED: true
+      WEBSOCKET_URL: ws://api-gateway:3000/ws
+      LEADERBOARD_UPDATE_INTERVAL: 30000
+      ACHIEVEMENT_CHECK_INTERVAL: 60000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aiops-network
+
+  # Analytics Service
+  analytics-service:
+    build:
+      context: ./services/analytics-service
+      dockerfile: Dockerfile
+    container_name: aiops-analytics-service
+    ports:
+      - "3006:3006"
+      - "9006:9006" # Metrics port
+    environment:
+      NODE_ENV: development
+      PORT: 3006
+      LOG_LEVEL: info
+      
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: aiops_learning_platform
+      DB_USER: postgres
+      DB_PASSWORD: password
+      DB_SSL: false
+      
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      
+      # JWT
+      JWT_SECRET: aiops-super-secret-jwt-key-for-development-only
+      
+      # Monitoring
+      METRICS_PORT: 9006
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      
+      # GamifyX Integration
+      GAMIFYX_ENABLED: true
+      WEBSOCKET_URL: ws://api-gateway:3000/ws
+      RISK_SCORE_THRESHOLD: 0.7
+      ALERT_CHECK_INTERVAL: 30000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aiops-network
+
+  # AI Feedback Service (Python FastAPI)
+  ai-feedback-service:
+    build:
+      context: ./services/ai-feedback-service
+      dockerfile: Dockerfile
+    container_name: aiops-ai-feedback-service
+    ports:
+      - "8000:8000"
+      - "9008:9008" # Metrics port
+    environment:
+      ENVIRONMENT: development
+      LOG_LEVEL: info
+      
+      # Database
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/aiops_learning_platform
+      
+      # Redis
+      REDIS_URL: redis://redis:6379/0
+      
+      # JWT
+      JWT_SECRET: aiops-super-secret-jwt-key-for-development-only
+      
+      # AI/ML Configuration
+      MODEL_PATH: /app/models
+      OPENAI_API_KEY: your-openai-api-key-here
+      HUGGINGFACE_API_KEY: your-huggingface-api-key-here
+      
+      # Monitoring
+      METRICS_PORT: 9008
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      
+      # GamifyX Integration
+      GAMIFYX_ENABLED: true
+      WEBSOCKET_URL: ws://api-gateway:3000/ws
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aiops-network
+
+  # Feedback Service
+  feedback-service:
+    build:
+      context: ./services/feedback-service
+      dockerfile: Dockerfile
+    container_name: aiops-feedback-service
+    ports:
+      - "3007:3007"
+      - "9007:9007" # Metrics port
+    environment:
+      NODE_ENV: development
+      PORT: 3007
+      LOG_LEVEL: info
+      
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: aiops_learning_platform
+      DB_USER: postgres
+      DB_PASSWORD: password
+      DB_SSL: false
+      
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      
+      # JWT
+      JWT_SECRET: aiops-super-secret-jwt-key-for-development-only
+      
+      # Monitoring
+      METRICS_PORT: 9007
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      
+      # GamifyX Integration
+      GAMIFYX_ENABLED: true
+      WEBSOCKET_URL: ws://api-gateway:3000/ws
+      AI_FEEDBACK_SERVICE_URL: http://ai-feedback-service:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ai-feedback-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3007/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aiops-network
+
+  # Integration Service
+  integration-service:
+    build:
+      context: ./services/integration-service
+      dockerfile: Dockerfile
+    container_name: aiops-integration-service
+    ports:
+      - "3008:3008"
+      - "9009:9009" # Metrics port
+    environment:
+      NODE_ENV: development
+      PORT: 3008
+      LOG_LEVEL: info
+      
+      # Service URLs
+      USER_SERVICE_URL: http://user-service:3001
+      SUBMISSION_SERVICE_URL: http://submission-service:3002
+      GAMIFICATION_SERVICE_URL: http://gamification-service:3005
+      ANALYTICS_SERVICE_URL: http://analytics-service:3006
+      AI_FEEDBACK_SERVICE_URL: http://ai-feedback-service:8000
+      FEEDBACK_SERVICE_URL: http://feedback-service:3007
+      
+      # JWT
+      JWT_SECRET: aiops-super-secret-jwt-key-for-development-only
+      
+      # Monitoring
+      METRICS_PORT: 9009
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      
+      # GamifyX Integration
+      GAMIFYX_ENABLED: true
+      WEBSOCKET_URL: ws://api-gateway:3000/ws
+    depends_on:
+      - user-service
+      - submission-service
+      - gamification-service
+      - analytics-service
+      - ai-feedback-service
+      - feedback-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3008/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aiops-network
+
+  # Secrets Manager Service
+  secrets-manager:
+    build:
+      context: ./services/secrets-manager
+      dockerfile: Dockerfile
+    container_name: aiops-secrets-manager
+    ports:
+      - "3003:3003"
+      - "9003:9003" # Metrics port
+    environment:
+      NODE_ENV: development
+      PORT: 3003
+      LOG_LEVEL: info
+      
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: aiops_secrets
+      DB_USER: postgres
+      DB_PASSWORD: password
+      DB_SSL: false
+      
+      # Vault
+      VAULT_ENDPOINT: http://vault:8200
+      VAULT_TOKEN: dev-token
+      VAULT_API_VERSION: v1
+      VAULT_TIMEOUT: 30000
+      VAULT_RETRIES: 3
+      
+      # Authentication
+      JWT_SECRET: aiops-super-secret-jwt-key-for-development-only
+      
+      # Monitoring
+      METRICS_PORT: 9003
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+    depends_on:
+      postgres:
+        condition: service_healthy
+      vault:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aiops-network
+
+  # Security Dashboard Service
+  security-dashboard:
+    build:
+      context: ./services/security-dashboard
+      dockerfile: Dockerfile
+    container_name: aiops-security-dashboard
+    ports:
+      - "3004:3004"
+      - "9004:9004" # Metrics port
+    environment:
+      NODE_ENV: development
+      PORT: 3004
+      LOG_LEVEL: info
+      
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: aiops_security
+      DB_USER: postgres
+      DB_PASSWORD: password
+      DB_SSL: false
+      
+      # Authentication
+      JWT_SECRET: aiops-super-secret-jwt-key-for-development-only
+      
+      # Monitoring
+      METRICS_PORT: 9004
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      
+      # Threat Intelligence (optional)
+      # MISP_URL: https://misp.local
+      # MISP_API_KEY: your-misp-api-key
+      # OTX_API_KEY: your-otx-api-key
+      # VIRUSTOTAL_API_KEY: your-virustotal-api-key
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aiops-network
+
+  # API Gateway - Enhanced for GamifyX Full-Stack Platform with Advanced Features
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+    container_name: aiops-api-gateway
+    ports:
+      - "3000:3000"
+      - "9000:9000" # Metrics port
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      LOG_LEVEL: info
+      
+      # Core Service URLs
+      USER_SERVICE_URL: http://user-service:3001
+      SUBMISSION_SERVICE_URL: http://submission-service:3002
+      SECRETS_MANAGER_URL: http://secrets-manager:3003
+      SECURITY_DASHBOARD_URL: http://security-dashboard:3004
+      GAMIFICATION_SERVICE_URL: http://gamification-service:3005
+      ANALYTICS_SERVICE_URL: http://analytics-service:3006
+      FEEDBACK_SERVICE_URL: http://feedback-service:3007
+      INTEGRATION_SERVICE_URL: http://integration-service:3008
+      AI_FEEDBACK_SERVICE_URL: http://ai-feedback-service:8000
+      
+      # Authentication
+      JWT_SECRET: aiops-super-secret-jwt-key-for-development-only
+      
+      # Monitoring
+      METRICS_PORT: 9000
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      PROMETHEUS_ENDPOINT: http://prometheus:9090
+      
+      # GamifyX Configuration
+      GAMIFYX_ENABLED: true
+      WEBSOCKET_ENABLED: true
+      CORS_ORIGINS: http://localhost:8080,http://localhost:3000,http://localhost:3001
+      REAL_TIME_UPDATES: true
+      CYBERPUNK_THEME: true
+      
+      # Rate Limiting
+      RATE_LIMIT_WINDOW_MS: 900000  # 15 minutes
+      RATE_LIMIT_MAX_REQUESTS: 1000
+      
+      # WebSocket Configuration
+      WS_HEARTBEAT_INTERVAL: 30000
+      WS_MAX_CONNECTIONS: 1000
+      
+      # Circuit Breaker Configuration
+      CIRCUIT_BREAKER_ENABLED: true
+      CIRCUIT_BREAKER_THRESHOLD: 5
+      CIRCUIT_BREAKER_TIMEOUT: 60000
+      
+      # Load Balancer Configuration
+      LOAD_BALANCER_STRATEGY: adaptive
+      HEALTH_CHECK_INTERVAL: 30000
+      
+      # Service Discovery Configuration
+      SERVICE_DISCOVERY_ENABLED: true
+      AUTO_DISCOVERY: true
+      
+      # Performance Optimization
+      CACHE_TTL: 300
+      CONNECTION_POOL_SIZE: 20
+      REQUEST_TIMEOUT: 30000
+      
+      # Advanced Features
+      TRACING_ENABLED: true
+      METRICS_COLLECTION_ENABLED: true
+      ALERT_CORRELATION_ENABLED: true
+    depends_on:
+      - user-service
+      - submission-service
+      - secrets-manager
+      - security-dashboard
+      - gamification-service
+      - analytics-service
+      - feedback-service
+      - ai-feedback-service
+      - integration-service
+      - prometheus
+      - jaeger
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aiops-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+
+  # =============================================================================
+  # FRONTEND - GamifyX Cyberpunk Dashboard
+  # =============================================================================
+
+  # GamifyX Frontend Application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: aiops-gamifyx-frontend
+    ports:
+      - "8080:80"
+    environment:
+      # API Configuration
+      REACT_APP_API_URL: http://localhost:3000/api
+      REACT_APP_WS_URL: ws://localhost:3000/ws
+      REACT_APP_ENVIRONMENT: development
+      
+      # GamifyX Configuration
+      REACT_APP_GAMIFYX_ENABLED: true
+      REACT_APP_CYBERPUNK_THEME: true
+      REACT_APP_REAL_TIME_UPDATES: true
+      
+      # Feature Flags
+      REACT_APP_ENABLE_NOTIFICATIONS: true
+      REACT_APP_ENABLE_ANIMATIONS: true
+      REACT_APP_ENABLE_PARTICLES: true
+      REACT_APP_ENABLE_SOUND_EFFECTS: false
+      
+      # Performance Configuration
+      REACT_APP_UPDATE_INTERVAL: 5000
+      REACT_APP_METRICS_REFRESH_RATE: 10000
+      REACT_APP_LEADERBOARD_REFRESH_RATE: 30000
+      
+      # Debug Configuration
+      REACT_APP_DEBUG_MODE: true
+      REACT_APP_LOG_LEVEL: info
+    depends_on:
+      - api-gateway
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aiops-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+  loki_data:
+  tempo_data:
+  influxdb_data:
+
+networks:
+  aiops-network:
+    driver: bridge

@@ -1,0 +1,267 @@
+# OpenTelemetry Collector Configuration for GamifyX AIOps Learning Platform
+
+receivers:
+  # OTLP receiver for traces, metrics, and logs
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - "http://localhost:8080"
+            - "http://localhost:3000"
+            - "http://localhost:3001"
+
+  # Prometheus receiver for scraping metrics
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'otel-collector'
+          scrape_interval: 15s
+          static_configs:
+            - targets: ['localhost:8888']
+        
+        - job_name: 'api-gateway'
+          scrape_interval: 15s
+          static_configs:
+            - targets: ['api-gateway:9000']
+          metrics_path: '/metrics'
+        
+        - job_name: 'user-service'
+          scrape_interval: 15s
+          static_configs:
+            - targets: ['user-service:9001']
+          metrics_path: '/metrics'
+        
+        - job_name: 'submission-service'
+          scrape_interval: 15s
+          static_configs:
+            - targets: ['submission-service:9002']
+          metrics_path: '/metrics'
+        
+        - job_name: 'secrets-manager'
+          scrape_interval: 15s
+          static_configs:
+            - targets: ['secrets-manager:9003']
+          metrics_path: '/metrics'
+        
+        - job_name: 'security-dashboard'
+          scrape_interval: 15s
+          static_configs:
+            - targets: ['security-dashboard:9004']
+          metrics_path: '/metrics'
+        
+        - job_name: 'gamification-service'
+          scrape_interval: 15s
+          static_configs:
+            - targets: ['gamification-service:9005']
+          metrics_path: '/metrics'
+        
+        - job_name: 'analytics-service'
+          scrape_interval: 15s
+          static_configs:
+            - targets: ['analytics-service:9006']
+          metrics_path: '/metrics'
+        
+        - job_name: 'feedback-service'
+          scrape_interval: 15s
+          static_configs:
+            - targets: ['feedback-service:9007']
+          metrics_path: '/metrics'
+        
+        - job_name: 'ai-feedback-service'
+          scrape_interval: 15s
+          static_configs:
+            - targets: ['ai-feedback-service:9008']
+          metrics_path: '/metrics'
+        
+        - job_name: 'integration-service'
+          scrape_interval: 15s
+          static_configs:
+            - targets: ['integration-service:9009']
+          metrics_path: '/metrics'
+
+  # Host metrics receiver
+  hostmetrics:
+    collection_interval: 30s
+    scrapers:
+      cpu:
+        metrics:
+          system.cpu.utilization:
+            enabled: true
+      memory:
+        metrics:
+          system.memory.utilization:
+            enabled: true
+      disk:
+        metrics:
+          system.disk.io:
+            enabled: true
+      network:
+        metrics:
+          system.network.io:
+            enabled: true
+      load:
+        metrics:
+          system.cpu.load_average.1m:
+            enabled: true
+          system.cpu.load_average.5m:
+            enabled: true
+          system.cpu.load_average.15m:
+            enabled: true
+
+processors:
+  # Batch processor for better performance
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+    send_batch_max_size: 2048
+
+  # Memory limiter to prevent OOM
+  memory_limiter:
+    limit_mib: 512
+    spike_limit_mib: 128
+    check_interval: 5s
+
+  # Resource processor to add service information
+  resource:
+    attributes:
+      - key: service.namespace
+        value: "gamifyx"
+        action: upsert
+      - key: deployment.environment
+        value: "development"
+        action: upsert
+      - key: service.version
+        value: "2.0.0"
+        action: upsert
+
+  # Attributes processor for enrichment
+  attributes:
+    actions:
+      - key: environment
+        value: "development"
+        action: insert
+      - key: platform
+        value: "gamifyx-aiops"
+        action: insert
+
+  # Probabilistic sampler for traces (adjust for production)
+  probabilistic_sampler:
+    sampling_percentage: 100  # 100% for development, reduce for production
+
+  # Filter processor to remove sensitive data
+  filter:
+    traces:
+      span:
+        - 'attributes["http.url"] != nil and IsMatch(attributes["http.url"], ".*password.*")'
+        - 'attributes["http.url"] != nil and IsMatch(attributes["http.url"], ".*token.*")'
+    metrics:
+      metric:
+        - 'name == "up"'  # Remove Prometheus 'up' metric
+
+exporters:
+  # Prometheus exporter
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    namespace: "gamifyx"
+    const_labels:
+      platform: "aiops-learning"
+    send_timestamps: true
+    metric_expiration: 180m
+    enable_open_metrics: true
+
+  # Jaeger exporter for traces
+  jaeger:
+    endpoint: jaeger:14250
+    tls:
+      insecure: true
+
+  # Tempo exporter for traces
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+
+  # Loki exporter for logs
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+    labels:
+      attributes:
+        service.name: "service_name"
+        service.namespace: "service_namespace"
+      resource:
+        container.name: "container_name"
+
+  # Prometheus remote write for metrics
+  prometheusremotewrite:
+    endpoint: http://prometheus:9090/api/v1/write
+    tls:
+      insecure: true
+    headers:
+      X-Prometheus-Remote-Write-Version: "0.1.0"
+
+  # Debug exporter for troubleshooting
+  debug:
+    verbosity: basic
+    sampling_initial: 5
+    sampling_thereafter: 200
+
+  # File exporter for backup
+  file:
+    path: /tmp/otel-data.json
+
+extensions:
+  # Health check extension
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+  # pprof extension for performance profiling
+  pprof:
+    endpoint: 0.0.0.0:1777
+
+  # zpages extension for debugging
+  zpages:
+    endpoint: 0.0.0.0:55679
+
+service:
+  extensions: [health_check, pprof, zpages]
+  
+  pipelines:
+    # Traces pipeline
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resource, attributes, probabilistic_sampler, filter]
+      exporters: [jaeger, otlp/tempo, debug]
+
+    # Metrics pipeline
+    metrics:
+      receivers: [otlp, prometheus, hostmetrics]
+      processors: [memory_limiter, batch, resource, attributes, filter]
+      exporters: [prometheus, prometheusremotewrite, debug]
+
+    # Logs pipeline
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resource, attributes]
+      exporters: [loki, debug]
+
+  # Telemetry configuration
+  telemetry:
+    logs:
+      level: "info"
+      development: true
+      encoding: "json"
+      disable_caller: false
+      disable_stacktrace: false
+      output_paths: ["stdout"]
+      error_output_paths: ["stderr"]
+    
+    metrics:
+      level: "basic"
+      address: "0.0.0.0:8888"
+    
+    traces:
+      level: "basic"

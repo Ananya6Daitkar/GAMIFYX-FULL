@@ -1,0 +1,424 @@
+{
+  "summary": {
+    "title": "AIOps Learning Platform - Threat Model",
+    "owner": "Security Team",
+    "description": "Comprehensive threat model for the AIOps Learning Platform covering all components, data flows, and potential attack vectors",
+    "id": "aiops-learning-platform-threat-model",
+    "version": "1.0.0",
+    "created": "2024-01-15",
+    "updated": "2024-01-15"
+  },
+  "detail": {
+    "contributors": [
+      {
+        "name": "Security Architect",
+        "role": "Lead"
+      },
+      {
+        "name": "DevOps Engineer", 
+        "role": "Infrastructure"
+      },
+      {
+        "name": "Application Developer",
+        "role": "Application Security"
+      }
+    ],
+    "diagrams": [
+      {
+        "id": "main-architecture",
+        "title": "AIOps Learning Platform - Main Architecture",
+        "diagramType": "STRIDE",
+        "placeholder": "Created with OWASP Threat Dragon",
+        "thumbnail": "./diagrams/main-architecture.png",
+        "version": "2.2.0",
+        "cells": [
+          {
+            "type": "tm.Process",
+            "id": "user-service",
+            "position": { "x": 100, "y": 100 },
+            "size": { "width": 120, "height": 80 },
+            "attrs": {
+              "text": { "text": "User Service\n(Authentication)" },
+              "body": { "fill": "#e8f4fd" }
+            },
+            "threats": [
+              {
+                "id": "auth-bypass",
+                "title": "Authentication Bypass",
+                "type": "Spoofing",
+                "status": "Mitigated",
+                "severity": "High",
+                "description": "Attacker attempts to bypass authentication mechanisms",
+                "mitigation": "Multi-factor authentication, JWT with short expiry, rate limiting"
+              },
+              {
+                "id": "session-hijack",
+                "title": "Session Hijacking",
+                "type": "Spoofing",
+                "status": "Mitigated", 
+                "severity": "High",
+                "description": "Attacker steals or hijacks user session tokens",
+                "mitigation": "Secure cookie flags, HTTPS only, session rotation"
+              }
+            ]
+          },
+          {
+            "type": "tm.Process",
+            "id": "submission-service",
+            "position": { "x": 300, "y": 100 },
+            "size": { "width": 120, "height": 80 },
+            "attrs": {
+              "text": { "text": "Submission Service\n(Code Processing)" },
+              "body": { "fill": "#e8f4fd" }
+            },
+            "threats": [
+              {
+                "id": "code-injection",
+                "title": "Code Injection Attack",
+                "type": "Tampering",
+                "status": "Mitigated",
+                "severity": "Critical",
+                "description": "Malicious code execution through submitted code",
+                "mitigation": "Sandboxed execution, input validation, container isolation"
+              },
+              {
+                "id": "dos-large-files",
+                "title": "DoS via Large File Upload",
+                "type": "Denial of Service",
+                "status": "Mitigated",
+                "severity": "Medium",
+                "description": "Resource exhaustion through large code submissions",
+                "mitigation": "File size limits, rate limiting, resource quotas"
+              }
+            ]
+          },
+          {
+            "type": "tm.Process",
+            "id": "ai-feedback-service",
+            "position": { "x": 500, "y": 100 },
+            "size": { "width": 120, "height": 80 },
+            "attrs": {
+              "text": { "text": "AI Feedback Service\n(ML Analysis)" },
+              "body": { "fill": "#e8f4fd" }
+            },
+            "threats": [
+              {
+                "id": "model-poisoning",
+                "title": "ML Model Poisoning",
+                "type": "Tampering",
+                "status": "Needs Investigation",
+                "severity": "High",
+                "description": "Adversarial inputs to corrupt ML model behavior",
+                "mitigation": "Input validation, model versioning, anomaly detection"
+              },
+              {
+                "id": "data-extraction",
+                "title": "Training Data Extraction",
+                "type": "Information Disclosure",
+                "status": "Mitigated",
+                "severity": "Medium",
+                "description": "Attempts to extract training data from model responses",
+                "mitigation": "Differential privacy, output filtering, access controls"
+              }
+            ]
+          },
+          {
+            "type": "tm.Store",
+            "id": "database",
+            "position": { "x": 200, "y": 300 },
+            "size": { "width": 120, "height": 80 },
+            "attrs": {
+              "text": { "text": "PostgreSQL\nDatabase" },
+              "body": { "fill": "#ffd6d6" }
+            },
+            "threats": [
+              {
+                "id": "sql-injection",
+                "title": "SQL Injection",
+                "type": "Tampering",
+                "status": "Mitigated",
+                "severity": "High",
+                "description": "SQL injection through application inputs",
+                "mitigation": "Parameterized queries, ORM usage, input validation"
+              },
+              {
+                "id": "data-breach",
+                "title": "Database Data Breach",
+                "type": "Information Disclosure",
+                "status": "Mitigated",
+                "severity": "Critical",
+                "description": "Unauthorized access to sensitive student data",
+                "mitigation": "Encryption at rest, access controls, audit logging"
+              }
+            ]
+          },
+          {
+            "type": "tm.Store",
+            "id": "redis-cache",
+            "position": { "x": 400, "y": 300 },
+            "size": { "width": 120, "height": 80 },
+            "attrs": {
+              "text": { "text": "Redis Cache\n(Sessions)" },
+              "body": { "fill": "#ffd6d6" }
+            },
+            "threats": [
+              {
+                "id": "cache-poisoning",
+                "title": "Cache Poisoning",
+                "type": "Tampering",
+                "status": "Mitigated",
+                "severity": "Medium",
+                "description": "Injection of malicious data into cache",
+                "mitigation": "Input validation, cache key validation, TTL limits"
+              }
+            ]
+          },
+          {
+            "type": "tm.Actor",
+            "id": "student",
+            "position": { "x": 50, "y": 50 },
+            "size": { "width": 80, "height": 60 },
+            "attrs": {
+              "text": { "text": "Student" },
+              "body": { "fill": "#d4edda" }
+            }
+          },
+          {
+            "type": "tm.Actor",
+            "id": "teacher",
+            "position": { "x": 150, "y": 50 },
+            "size": { "width": 80, "height": 60 },
+            "attrs": {
+              "text": { "text": "Teacher" },
+              "body": { "fill": "#d4edda" }
+            }
+          },
+          {
+            "type": "tm.Actor",
+            "id": "attacker",
+            "position": { "x": 600, "y": 50 },
+            "size": { "width": 80, "height": 60 },
+            "attrs": {
+              "text": { "text": "Attacker" },
+              "body": { "fill": "#f8d7da" }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "threats": [
+    {
+      "id": "T001",
+      "title": "Data Exfiltration via Unencrypted API",
+      "type": "Information Disclosure",
+      "severity": "High",
+      "likelihood": "Medium",
+      "impact": "High",
+      "description": "Attacker intercepts API communications to steal sensitive student data including submissions, grades, and personal information",
+      "attack_vectors": [
+        "Man-in-the-middle attacks on unencrypted connections",
+        "Network sniffing on shared networks",
+        "Compromised network infrastructure"
+      ],
+      "affected_components": [
+        "API Gateway",
+        "All microservices",
+        "Frontend-backend communication"
+      ],
+      "mitigations": [
+        {
+          "control": "Enforce HTTPS/TLS 1.3 for all API communications",
+          "status": "Implemented",
+          "nist_control": "SC-8",
+          "cis_control": "3.10"
+        },
+        {
+          "control": "Implement certificate pinning in mobile/desktop clients",
+          "status": "Planned",
+          "nist_control": "SC-8",
+          "cis_control": "3.10"
+        },
+        {
+          "control": "Use HSTS headers to prevent protocol downgrade",
+          "status": "Implemented",
+          "nist_control": "SC-8",
+          "cis_control": "3.10"
+        }
+      ],
+      "testing": {
+        "automated": "SSL/TLS configuration scanner",
+        "manual": "Penetration testing of API endpoints"
+      }
+    },
+    {
+      "id": "T002", 
+      "title": "IAM Privilege Escalation",
+      "type": "Elevation of Privilege",
+      "severity": "Critical",
+      "likelihood": "Low",
+      "impact": "Critical",
+      "description": "Attacker exploits IAM misconfigurations to gain elevated privileges and access sensitive administrative functions",
+      "attack_vectors": [
+        "Exploitation of overprivileged service accounts",
+        "JWT token manipulation",
+        "Role-based access control bypass",
+        "Privilege escalation through API abuse"
+      ],
+      "affected_components": [
+        "User Service",
+        "All microservices with RBAC",
+        "Administrative interfaces"
+      ],
+      "mitigations": [
+        {
+          "control": "Implement least privilege principle for all roles",
+          "status": "Implemented",
+          "nist_control": "AC-6",
+          "cis_control": "6.1"
+        },
+        {
+          "control": "Regular access reviews and privilege auditing",
+          "status": "Implemented",
+          "nist_control": "AC-2",
+          "cis_control": "6.2"
+        },
+        {
+          "control": "Multi-factor authentication for privileged accounts",
+          "status": "Implemented",
+          "nist_control": "IA-2",
+          "cis_control": "6.3"
+        },
+        {
+          "control": "JWT token validation and short expiry times",
+          "status": "Implemented",
+          "nist_control": "IA-5",
+          "cis_control": "6.2"
+        }
+      ],
+      "testing": {
+        "automated": "IAM policy analyzer and privilege escalation scanner",
+        "manual": "Privilege escalation penetration testing"
+      }
+    },
+    {
+      "id": "T003",
+      "title": "Supply Chain Compromise via Malicious Dependencies",
+      "type": "Tampering",
+      "severity": "High", 
+      "likelihood": "Medium",
+      "impact": "High",
+      "description": "Attacker compromises the software supply chain by injecting malicious code through compromised dependencies or build processes",
+      "attack_vectors": [
+        "Compromised npm/pip packages",
+        "Typosquatting attacks on package names",
+        "Compromised CI/CD pipeline",
+        "Malicious Docker base images"
+      ],
+      "affected_components": [
+        "All microservices",
+        "CI/CD pipeline",
+        "Container images",
+        "Third-party dependencies"
+      ],
+      "mitigations": [
+        {
+          "control": "Automated dependency vulnerability scanning with Trivy",
+          "status": "Implemented",
+          "nist_control": "SI-7",
+          "cis_control": "2.4"
+        },
+        {
+          "control": "Software Bill of Materials (SBOM) generation",
+          "status": "Implemented", 
+          "nist_control": "SI-7",
+          "cis_control": "2.4"
+        },
+        {
+          "control": "Package integrity verification and signing",
+          "status": "Planned",
+          "nist_control": "SI-7",
+          "cis_control": "2.4"
+        },
+        {
+          "control": "Secure CI/CD pipeline with signed commits",
+          "status": "Implemented",
+          "nist_control": "SI-7",
+          "cis_control": "10.5"
+        }
+      ],
+      "testing": {
+        "automated": "Dependency scanning in CI/CD pipeline",
+        "manual": "Supply chain security assessment"
+      }
+    }
+  ],
+  "attack_scenarios": [
+    {
+      "id": "AS001",
+      "title": "Student Data Breach Scenario",
+      "description": "Multi-stage attack targeting student personal information and academic records",
+      "steps": [
+        "Reconnaissance: Attacker identifies API endpoints through automated scanning",
+        "Initial Access: Exploits unpatched vulnerability in submission service",
+        "Privilege Escalation: Uses compromised service account to access database",
+        "Data Exfiltration: Downloads student records and submission history",
+        "Persistence: Establishes backdoor for continued access"
+      ],
+      "impact": "Exposure of 10,000+ student records, FERPA violations, reputation damage",
+      "likelihood": "Medium",
+      "mitigations": [
+        "Network segmentation and zero-trust architecture",
+        "Database encryption and access logging",
+        "Regular vulnerability assessments",
+        "Incident response procedures"
+      ]
+    },
+    {
+      "id": "AS002",
+      "title": "AI Model Manipulation Scenario", 
+      "description": "Targeted attack on AI feedback system to provide incorrect guidance",
+      "steps": [
+        "Research: Attacker studies AI model behavior patterns",
+        "Adversarial Input: Crafts malicious code submissions to poison model",
+        "Model Drift: Gradually corrupts model accuracy over time",
+        "Impact: Students receive incorrect feedback affecting learning outcomes"
+      ],
+      "impact": "Degraded learning experience, loss of trust in AI system",
+      "likelihood": "Low",
+      "mitigations": [
+        "Input validation and sanitization",
+        "Model monitoring and drift detection",
+        "A/B testing for model updates",
+        "Human oversight of AI recommendations"
+      ]
+    }
+  ],
+  "compliance_mapping": {
+    "nist_800_53": {
+      "AC-2": "Account Management - User account lifecycle management",
+      "AC-6": "Least Privilege - Minimal access rights enforcement", 
+      "IA-2": "Identification and Authentication - Multi-factor authentication",
+      "IA-5": "Authenticator Management - Token and credential management",
+      "SC-8": "Transmission Confidentiality - Encrypted communications",
+      "SI-7": "Software Integrity - Code and dependency verification"
+    },
+    "cis_controls": {
+      "2.4": "Utilize Automated Software Inventory Tools",
+      "3.10": "Encrypt Sensitive Data in Transit",
+      "6.1": "Establish an Access Granting Process",
+      "6.2": "Establish an Access Review Process", 
+      "6.3": "Require MFA for Externally-Exposed Applications",
+      "10.5": "Enable Anti-Exploitation Features"
+    }
+  },
+  "security_metrics": {
+    "threat_coverage": "85%",
+    "mitigated_threats": 12,
+    "open_threats": 3,
+    "critical_threats": 1,
+    "high_threats": 4,
+    "medium_threats": 6,
+    "low_threats": 4
+  }
+}

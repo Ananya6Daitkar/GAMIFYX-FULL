@@ -1,0 +1,61 @@
+{
+  "name": "aiops-learning-platform",
+  "version": "1.0.0",
+  "description": "AIOps Learning Platform - Gamified DevOps Education System",
+  "private": true,
+  "workspaces": [
+    "services/*",
+    "frontend",
+    "tests"
+  ],
+  "scripts": {
+    "install:all": "npm install && npm run install:services && npm run install:frontend && npm run install:tests",
+    "install:services": "npm install --workspace=services/user-service && npm install --workspace=services/submission-service && npm install --workspace=services/gamification-service && npm install --workspace=services/feedback-service && npm install --workspace=services/analytics-service",
+    "install:frontend": "npm install --workspace=frontend",
+    "install:tests": "npm install --workspace=tests",
+    "build": "npm run build:services && npm run build:frontend",
+    "build:services": "npm run build --workspace=services/user-service && npm run build --workspace=services/submission-service && npm run build --workspace=services/gamification-service && npm run build --workspace=services/feedback-service && npm run build --workspace=services/analytics-service",
+    "build:frontend": "npm run build --workspace=frontend",
+    "test": "npm run test:services && npm run test:integration",
+    "test:services": "npm run test --workspace=services/user-service",
+    "test:integration": "npm run test --workspace=tests",
+    "test:docker": "npm run test:docker --workspace=tests",
+    "dev:services": "concurrently \"npm run dev --workspace=services/user-service\" \"npm run dev --workspace=services/submission-service\" \"npm run dev --workspace=services/gamification-service\" \"npm run dev --workspace=services/feedback-service\" \"npm run dev --workspace=services/analytics-service\"",
+    "dev:frontend": "npm run start --workspace=frontend",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:build": "docker-compose build",
+    "docker:logs": "docker-compose logs -f",
+    "lint": "npm run lint --workspace=services/user-service && npm run lint --workspace=services/submission-service && npm run lint --workspace=services/gamification-service && npm run lint --workspace=services/feedback-service && npm run lint --workspace=services/analytics-service && npm run lint --workspace=frontend",
+    "clean": "npm run clean:services && npm run clean:frontend",
+    "clean:services": "rm -rf services/*/dist services/*/node_modules",
+    "clean:frontend": "rm -rf frontend/build frontend/node_modules",
+    "health:check": "curl -f http://localhost:8080/health || exit 1"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "aiops",
+    "devops",
+    "education",
+    "gamification",
+    "microservices",
+    "observability"
+  ],
+  "author": "AIOps Learning Platform Team",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "socket.io": "^4.8.1"
+  },
+  "main": "mock-api-server.js",
+  "directories": {
+    "test": "tests"
+  }
+}

@@ -1,0 +1,128 @@
+# Trivy Configuration for GamifyX Security Scanning
+
+# Global settings
+format: json
+output: security/reports/trivy-report.json
+exit-code: 1
+severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+ignore-unfixed: false
+skip-update: false
+clear-cache: false
+
+# Vulnerability database settings
+db:
+  repository: ghcr.io/aquasecurity/trivy-db
+  skip-update: false
+
+# Scanner settings
+scanners:
+  - vuln
+  - secret
+  - config
+  - license
+
+# Vulnerability settings
+vulnerability:
+  type:
+    - os
+    - library
+  ignore-unfixed: false
+
+# Secret scanning settings
+secret:
+  config: security/trivy/secret-config.yaml
+
+# Configuration scanning settings
+config:
+  policy: security/trivy/policies
+  data: security/trivy/data
+  namespaces:
+    - main
+    - builtin
+
+# License scanning settings
+license:
+  full: true
+  ignored:
+    - MIT
+    - Apache-2.0
+    - BSD-3-Clause
+    - ISC
+
+# File patterns to include/exclude
+file-patterns:
+  - "**/*.js"
+  - "**/*.ts"
+  - "**/*.jsx"
+  - "**/*.tsx"
+  - "**/*.py"
+  - "**/*.go"
+  - "**/*.java"
+  - "**/*.dockerfile"
+  - "**/Dockerfile*"
+  - "**/*.yaml"
+  - "**/*.yml"
+  - "**/*.json"
+  - "**/*.toml"
+  - "**/*.lock"
+
+skip-files:
+  - "node_modules/**"
+  - "dist/**"
+  - "build/**"
+  - "coverage/**"
+  - "*.test.js"
+  - "*.test.ts"
+  - "*.spec.js"
+  - "*.spec.ts"
+
+skip-dirs:
+  - node_modules
+  - .git
+  - .github
+  - dist
+  - build
+  - coverage
+  - logs
+
+# Custom policies for GamifyX
+custom-policies:
+  - path: security/trivy/policies/gamifyx-security.rego
+    namespaces:
+      - gamifyx.security
+  - path: security/trivy/policies/docker-security.rego
+    namespaces:
+      - docker.security
+  - path: security/trivy/policies/kubernetes-security.rego
+    namespaces:
+      - kubernetes.security
+
+# Reporting settings
+report:
+  format: json
+  template: security/trivy/templates/gamifyx-report.tpl
+  summary: true
+  list-all-pkgs: false
+
+# Cache settings
+cache:
+  dir: /tmp/trivy-cache
+  ttl: 24h
+
+# Registry settings for container scanning
+registry:
+  token: ${REGISTRY_TOKEN}
+  username: ${REGISTRY_USERNAME}
+  password: ${REGISTRY_PASSWORD}
+
+# Timeout settings
+timeout: 5m
+
+# Parallel processing
+parallel: 5
+
+# Quiet mode (reduce output)
+quiet: false
+
+# Debug mode
+debug: false

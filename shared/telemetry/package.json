@@ -1,0 +1,35 @@
+{
+  "name": "@gamifyx/telemetry",
+  "version": "2.0.0",
+  "description": "Shared OpenTelemetry instrumentation for GamifyX services",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.6.0",
+    "@opentelemetry/sdk-node": "^0.45.0",
+    "@opentelemetry/resources": "^1.17.0",
+    "@opentelemetry/semantic-conventions": "^1.17.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.40.0",
+    "@opentelemetry/sdk-metrics": "^1.17.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.45.0",
+    "@opentelemetry/exporter-metrics-otlp-http": "^0.45.0",
+    "@opentelemetry/exporter-prometheus": "^0.45.0",
+    "@opentelemetry/sdk-trace-node": "^1.17.0",
+    "@opentelemetry/instrumentation-http": "^0.45.0",
+    "@opentelemetry/instrumentation-express": "^0.34.0",
+    "@opentelemetry/instrumentation-pg": "^0.36.0",
+    "@opentelemetry/instrumentation-redis": "^0.35.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.1.6",
+    "@types/node": "^20.4.2"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

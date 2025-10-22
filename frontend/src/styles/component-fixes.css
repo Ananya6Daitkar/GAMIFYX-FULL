@@ -1,0 +1,529 @@
+/* Component Alignment Fixes */
+
+/* ===== CARD LAYOUT STANDARDIZATION ===== */
+
+/* MUI Card overrides for consistent spacing */
+.MuiCard-root {
+  background: var(--gradient-card) !important;
+  border: 1px solid rgba(0, 255, 255, 0.2) !important;
+  border-radius: var(--radius-xl) !important;
+  backdrop-filter: blur(var(--blur-lg)) !important;
+  box-shadow: var(--shadow-lg) !important;
+  transition: all var(--transition-normal) !important;
+}
+
+.MuiCard-root:hover {
+  transform: translateY(-2px) !important;
+  border-color: rgba(0, 255, 255, 0.4) !important;
+  box-shadow: var(--shadow-xl), 0 0 20px rgba(0, 255, 255, 0.1) !important;
+}
+
+.MuiCardContent-root {
+  padding: var(--spacing-lg) !important;
+}
+
+.MuiCardContent-root:last-child {
+  padding-bottom: var(--spacing-lg) !important;
+}
+
+/* Standardized card headers */
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-title {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+  text-align: left;
+}
+
+.card-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+  text-align: left;
+}
+
+/* ===== STATISTICS AND NUMERICAL DISPLAY ALIGNMENT ===== */
+
+/* Standardized metric containers */
+.metric-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  padding: var(--spacing-md);
+  background: var(--color-surface-glass);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-height: 120px;
+  justify-content: space-between;
+}
+
+.metric-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: var(--spacing-sm);
+}
+
+.metric-value {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  line-height: 1;
+  margin: var(--spacing-xs) 0;
+  text-align: left;
+}
+
+.metric-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  margin: 0;
+  text-align: left;
+}
+
+.metric-change {
+  font-size: var(--font-size-xs);
+  margin-top: var(--spacing-xs);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.metric-change.positive {
+  color: var(--color-success);
+}
+
+.metric-change.negative {
+  color: var(--color-error);
+}
+
+.metric-change.neutral {
+  color: var(--color-text-secondary);
+}
+
+/* Leaderboard and ranking fixes */
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+  background: var(--color-surface-glass);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  transition: all var(--transition-normal);
+}
+
+.leaderboard-item:hover {
+  transform: translateX(4px);
+  border-color: rgba(0, 255, 255, 0.4);
+  box-shadow: 0 4px 20px rgba(0, 255, 255, 0.1);
+}
+
+.leaderboard-rank {
+  min-width: 40px;
+  text-align: center;
+  margin-right: var(--spacing-md);
+}
+
+.leaderboard-avatar {
+  margin-right: var(--spacing-md);
+}
+
+.leaderboard-info {
+  flex: 1;
+  text-align: left;
+}
+
+.leaderboard-name {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+  text-align: left;
+}
+
+.leaderboard-stats {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.leaderboard-score {
+  text-align: right;
+  min-width: 60px;
+}
+
+/* Statistics grid alignment */
+.stats-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stats-row:last-child {
+  border-bottom: none;
+}
+
+.stats-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-align: left;
+  flex: 1;
+}
+
+.stats-value {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  text-align: right;
+  min-width: 60px;
+}
+
+/* Progress bars alignment */
+.progress-container {
+  width: 100%;
+  margin: var(--spacing-sm) 0;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xs);
+}
+
+.progress-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-align: left;
+}
+
+.progress-value {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+  text-align: right;
+}
+
+/* ===== NAVIGATION AND BUTTON POSITIONING ===== */
+
+/* MUI Button overrides */
+.MuiButton-root {
+  border-radius: var(--radius-lg) !important;
+  text-transform: none !important;
+  font-weight: var(--font-weight-semibold) !important;
+  letter-spacing: var(--letter-spacing-normal) !important;
+  transition: all var(--transition-normal) !important;
+  padding: var(--spacing-sm) var(--spacing-lg) !important;
+}
+
+.MuiButton-contained {
+  background: var(--gradient-button) !important;
+  box-shadow: 0 4px 20px rgba(0, 255, 255, 0.3) !important;
+  color: var(--color-background) !important;
+}
+
+.MuiButton-contained:hover {
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-secondary-light) 100%) !important;
+  box-shadow: 0 6px 25px rgba(0, 255, 255, 0.4) !important;
+  transform: translateY(-2px) !important;
+}
+
+.MuiButton-outlined {
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary) !important;
+}
+
+.MuiButton-outlined:hover {
+  background: var(--color-surface-glow) !important;
+  border-color: var(--color-primary-light) !important;
+}
+
+/* IconButton alignment */
+.MuiIconButton-root {
+  color: var(--color-primary) !important;
+  transition: all var(--transition-normal) !important;
+}
+
+.MuiIconButton-root:hover {
+  background: var(--color-surface-glow) !important;
+  transform: scale(1.1) !important;
+}
+
+/* Chip alignment and styling */
+.MuiChip-root {
+  border-radius: var(--radius-md) !important;
+  font-weight: var(--font-weight-medium) !important;
+  backdrop-filter: blur(var(--blur-sm)) !important;
+}
+
+.MuiChip-filled {
+  background: rgba(0, 255, 255, 0.2) !important;
+  color: var(--color-primary) !important;
+  border: 1px solid rgba(0, 255, 255, 0.3) !important;
+}
+
+/* Tab navigation alignment */
+.MuiTabs-root {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.MuiTab-root {
+  text-transform: none !important;
+  font-weight: var(--font-weight-medium) !important;
+  color: var(--color-text-secondary) !important;
+  transition: all var(--transition-normal) !important;
+}
+
+.MuiTab-root.Mui-selected {
+  color: var(--color-primary) !important;
+}
+
+.MuiTabs-indicator {
+  background: var(--gradient-button) !important;
+  height: 3px !important;
+  border-radius: 2px !important;
+}
+
+/* Toggle button groups */
+.MuiToggleButtonGroup-root {
+  background: var(--color-surface-glass) !important;
+  border-radius: var(--radius-lg) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.MuiToggleButton-root {
+  border: none !important;
+  color: var(--color-text-secondary) !important;
+  text-transform: none !important;
+  font-weight: var(--font-weight-medium) !important;
+  padding: var(--spacing-sm) var(--spacing-md) !important;
+}
+
+.MuiToggleButton-root.Mui-selected {
+  background: var(--color-surface-glow) !important;
+  color: var(--color-primary) !important;
+}
+
+/* ===== LIST AND ITEM ALIGNMENT ===== */
+
+/* MUI List overrides */
+.MuiList-root {
+  padding: 0 !important;
+}
+
+.MuiListItem-root {
+  padding: var(--spacing-md) !important;
+  border-radius: var(--radius-lg) !important;
+  margin-bottom: var(--spacing-sm) !important;
+  background: var(--color-surface-glass) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  transition: all var(--transition-normal) !important;
+}
+
+.MuiListItem-root:hover {
+  background: var(--color-surface-glow) !important;
+  border-color: rgba(0, 255, 255, 0.2) !important;
+}
+
+.MuiListItemText-primary {
+  color: var(--color-text-primary) !important;
+  font-weight: var(--font-weight-medium) !important;
+  text-align: left !important;
+}
+
+.MuiListItemText-secondary {
+  color: var(--color-text-secondary) !important;
+  text-align: left !important;
+}
+
+/* Avatar alignment */
+.MuiAvatar-root {
+  border: 2px solid rgba(0, 255, 255, 0.3) !important;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.2) !important;
+}
+
+/* ===== GRID AND LAYOUT FIXES ===== */
+
+/* MUI Grid alignment */
+.MuiGrid-container {
+  align-items: stretch !important;
+}
+
+.MuiGrid-item {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.MuiGrid-item > * {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* ===== FORM ELEMENT ALIGNMENT ===== */
+
+/* MUI TextField overrides */
+.MuiTextField-root {
+  margin-bottom: var(--spacing-md) !important;
+}
+
+.MuiOutlinedInput-root {
+  background: var(--color-surface-glass) !important;
+  border-radius: var(--radius-lg) !important;
+}
+
+.MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(0, 255, 255, 0.4) !important;
+}
+
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(0, 255, 255, 0.2) !important;
+}
+
+.MuiInputLabel-root {
+  color: var(--color-text-secondary) !important;
+}
+
+.MuiInputLabel-root.Mui-focused {
+  color: var(--color-primary) !important;
+}
+
+/* ===== DIALOG AND MODAL ALIGNMENT ===== */
+
+.MuiDialog-paper {
+  background: var(--gradient-card) !important;
+  border: 1px solid rgba(0, 255, 255, 0.2) !important;
+  border-radius: var(--radius-xl) !important;
+  backdrop-filter: blur(var(--blur-lg)) !important;
+}
+
+.MuiDialogTitle-root {
+  text-align: center !important;
+  color: var(--color-text-primary) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.MuiDialogContent-root {
+  color: var(--color-text-primary) !important;
+}
+
+/* ===== RESPONSIVE ALIGNMENT FIXES ===== */
+
+@media (max-width: 768px) {
+  .metric-container {
+    min-height: auto;
+    padding: var(--spacing-sm);
+  }
+  
+  .metric-value {
+    font-size: var(--font-size-2xl);
+  }
+  
+  .leaderboard-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+  
+  .leaderboard-rank,
+  .leaderboard-avatar {
+    margin-right: 0;
+  }
+  
+  .leaderboard-score {
+    text-align: left;
+    min-width: auto;
+  }
+  
+  .stats-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+  
+  .stats-value {
+    text-align: left;
+    min-width: auto;
+  }
+  
+  .MuiCardContent-root {
+    padding: var(--spacing-md) !important;
+  }
+}
+
+/* ===== TEXT ALIGNMENT ENFORCEMENT ===== */
+
+/* Force left alignment for all text elements */
+.text-left-force,
+.text-left-force * {
+  text-align: left !important;
+}
+
+/* Specific overrides for common misaligned elements */
+.MuiTypography-root {
+  text-align: left !important;
+}
+
+.MuiTypography-h1,
+.MuiTypography-h2,
+.MuiTypography-h3,
+.MuiTypography-h4,
+.MuiTypography-h5,
+.MuiTypography-h6 {
+  text-align: left !important;
+}
+
+/* Center alignment only for specific cases */
+.text-center-override {
+  text-align: center !important;
+}
+
+.text-center-override * {
+  text-align: center !important;
+}
+
+/* Right alignment for numerical values */
+.text-right-numbers {
+  text-align: right !important;
+}
+
+/* ===== ACCESSIBILITY AND FOCUS FIXES ===== */
+
+/* Ensure proper focus indicators */
+.MuiButton-root:focus-visible,
+.MuiIconButton-root:focus-visible,
+.MuiTab-root:focus-visible {
+  outline: 2px solid var(--color-primary) !important;
+  outline-offset: 2px !important;
+}
+
+/* Ensure proper contrast for text */
+.MuiTypography-root {
+  color: var(--color-text-primary) !important;
+}
+
+.MuiTypography-caption,
+.MuiTypography-overline {
+  color: var(--color-text-secondary) !important;
+}

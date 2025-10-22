@@ -1,0 +1,158 @@
+# Service Discovery Configuration for AIOps Learning Platform
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-discovery-config
+  namespace: aiops-platform
+data:
+  services.json: |
+    {
+      "services": {
+        "user-service": {
+          "name": "user-service",
+          "port": 3001,
+          "health_check": "/health",
+          "endpoints": [
+            "/auth/login",
+            "/auth/register", 
+            "/users/{id}",
+            "/users/{id}/profile"
+          ],
+          "circuit_breaker": {
+            "failure_threshold": 5,
+            "recovery_timeout": 30000
+          },
+          "retry_policy": {
+            "max_attempts": 3,
+            "base_delay": 1000
+          }
+        },
+        "submission-service": {
+          "name": "submission-service", 
+          "port": 3002,
+          "health_check": "/health",
+          "endpoints": [
+            "/submissions",
+            "/submissions/{id}",
+            "/submissions/user/{userId}"
+          ],
+          "circuit_breaker": {
+            "failure_threshold": 5,
+            "recovery_timeout": 30000
+          },
+          "retry_policy": {
+            "max_attempts": 3,
+            "base_delay": 1000
+          }
+        },
+        "gamification-service": {
+          "name": "gamification-service",
+          "port": 3003, 
+          "health_check": "/health",
+          "endpoints": [
+            "/gamification/award-points",
+            "/gamification/leaderboard",
+            "/gamification/badges/{userId}"
+          ],
+          "circuit_breaker": {
+            "failure_threshold": 5,
+            "recovery_timeout": 30000
+          },
+          "retry_policy": {
+            "max_attempts": 3,
+            "base_delay": 1000
+          }
+        },
+        "feedback-service": {
+          "name": "feedback-service",
+          "port": 3004,
+          "health_check": "/health", 
+          "endpoints": [
+            "/feedback/analyze",
+            "/feedback/{submissionId}",
+            "/feedback/rate"
+          ],
+          "circuit_breaker": {
+            "failure_threshold": 3,
+            "recovery_timeout": 60000
+          },
+          "retry_policy": {
+            "max_attempts": 2,
+            "base_delay": 2000
+          }
+        },
+        "analytics-service": {
+          "name": "analytics-service",
+          "port": 3005,
+          "health_check": "/health",
+          "endpoints": [
+            "/analytics/performance/{userId}",
+            "/analytics/risk-scores", 
+            "/analytics/predict"
+          ],
+          "circuit_breaker": {
+            "failure_threshold": 5,
+            "recovery_timeout": 30000
+          },
+          "retry_policy": {
+            "max_attempts": 3,
+            "base_delay": 1000
+          }
+        },
+        "ai-feedback-service": {
+          "name": "ai-feedback-service",
+          "port": 8000,
+          "health_check": "/health",
+          "endpoints": [
+            "/analyze",
+            "/models/status"
+          ],
+          "circuit_breaker": {
+            "failure_threshold": 3,
+            "recovery_timeout": 60000
+          },
+          "retry_policy": {
+            "max_attempts": 2,
+            "base_delay": 5000
+          }
+        },
+        "integration-service": {
+          "name": "integration-service",
+          "port": 3006,
+          "health_check": "/health",
+          "endpoints": [
+            "/workflow/submission",
+            "/workflow/submission/{id}/status",
+            "/workflow/submission/{id}/retry"
+          ],
+          "circuit_breaker": {
+            "failure_threshold": 3,
+            "recovery_timeout": 30000
+          },
+          "retry_policy": {
+            "max_attempts": 2,
+            "base_delay": 1000
+          }
+        }
+      },
+      "load_balancing": {
+        "strategy": "round_robin",
+        "health_check_interval": 30,
+        "unhealthy_threshold": 3,
+        "healthy_threshold": 2
+      },
+      "rate_limiting": {
+        "default": {
+          "requests_per_minute": 600,
+          "burst": 20
+        },
+        "auth_endpoints": {
+          "requests_per_minute": 60,
+          "burst": 10
+        },
+        "workflow_endpoints": {
+          "requests_per_minute": 120,
+          "burst": 5
+        }
+      }
+    }

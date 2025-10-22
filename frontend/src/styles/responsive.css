@@ -1,0 +1,513 @@
+/* Responsive Breakpoints and Layout Fixes */
+
+/* ===== RESPONSIVE BREAKPOINT SYSTEM ===== */
+
+/* Base styles - Mobile first approach */
+.container-responsive {
+  width: 100%;
+  max-width: var(--max-content-width);
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+/* ===== MOBILE STYLES (320px - 575px) ===== */
+@media (max-width: 575px) {
+  /* Container adjustments */
+  .container-responsive {
+    padding: 0 var(--spacing-sm);
+  }
+  
+  /* Layout adjustments */
+  .app-main {
+    padding: var(--spacing-xs) !important;
+  }
+  
+  .app-header {
+    padding: 0 var(--spacing-sm) !important;
+    height: 56px !important;
+  }
+  
+  /* Grid system - single column on mobile */
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+    gap: var(--spacing-sm) !important;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: var(--spacing-sm) !important;
+  }
+  
+  /* Card adjustments */
+  .dashboard-card,
+  .MuiCard-root {
+    padding: var(--spacing-sm) !important;
+    border-radius: var(--radius-lg) !important;
+    margin-bottom: var(--spacing-sm) !important;
+  }
+  
+  .MuiCardContent-root {
+    padding: var(--spacing-sm) !important;
+  }
+  
+  /* Typography scaling */
+  .metric-value {
+    font-size: var(--font-size-2xl) !important;
+  }
+  
+  .card-title {
+    font-size: var(--font-size-md) !important;
+  }
+  
+  /* Button adjustments */
+  .MuiButton-root {
+    padding: var(--spacing-xs) var(--spacing-sm) !important;
+    font-size: var(--font-size-sm) !important;
+    min-width: auto !important;
+  }
+  
+  /* Navigation adjustments */
+  .MuiTabs-root {
+    min-height: 40px !important;
+  }
+  
+  .MuiTab-root {
+    min-height: 40px !important;
+    padding: var(--spacing-xs) var(--spacing-sm) !important;
+    font-size: var(--font-size-xs) !important;
+  }
+  
+  /* Leaderboard mobile layout */
+  .leaderboard-item {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: var(--spacing-sm) !important;
+    padding: var(--spacing-sm) !important;
+  }
+  
+  .leaderboard-rank,
+  .leaderboard-avatar {
+    margin-right: 0 !important;
+  }
+  
+  .leaderboard-info {
+    width: 100% !important;
+  }
+  
+  .leaderboard-stats {
+    flex-wrap: wrap !important;
+    gap: var(--spacing-xs) !important;
+  }
+  
+  .leaderboard-score {
+    text-align: left !important;
+    min-width: auto !important;
+  }
+  
+  /* Form elements */
+  .MuiTextField-root {
+    margin-bottom: var(--spacing-sm) !important;
+  }
+  
+  /* Dialog adjustments */
+  .MuiDialog-paper {
+    margin: var(--spacing-sm) !important;
+    width: calc(100% - var(--spacing-md)) !important;
+    max-width: none !important;
+  }
+  
+  /* Hide non-essential elements on mobile */
+  .hide-mobile {
+    display: none !important;
+  }
+  
+  /* Stack elements vertically */
+  .stack-mobile {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  
+  .stack-mobile > * {
+    width: 100% !important;
+    margin-bottom: var(--spacing-sm) !important;
+  }
+  
+  .stack-mobile > *:last-child {
+    margin-bottom: 0 !important;
+  }
+}
+
+/* ===== TABLET STYLES (576px - 767px) ===== */
+@media (min-width: 576px) and (max-width: 767px) {
+  /* Container adjustments */
+  .container-responsive {
+    padding: 0 var(--spacing-md);
+  }
+  
+  /* Layout adjustments */
+  .app-main {
+    padding: var(--spacing-sm) !important;
+  }
+  
+  /* Grid system - 2 columns on tablet */
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: var(--spacing-md) !important;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  /* Grid spans for tablet */
+  .grid-span-3,
+  .grid-span-4,
+  .grid-span-6,
+  .grid-span-8,
+  .grid-span-9,
+  .grid-span-12 {
+    grid-column: span 2 !important;
+  }
+  
+  .grid-span-1,
+  .grid-span-2 {
+    grid-column: span 1 !important;
+  }
+  
+  /* Card adjustments */
+  .dashboard-card,
+  .MuiCard-root {
+    padding: var(--spacing-md) !important;
+  }
+  
+  /* Typography adjustments */
+  .metric-value {
+    font-size: var(--font-size-3xl) !important;
+  }
+  
+  /* Button groups stack on tablet */
+  .button-group {
+    flex-wrap: wrap !important;
+    gap: var(--spacing-sm) !important;
+  }
+  
+  /* Navigation adjustments */
+  .MuiToggleButtonGroup-root {
+    flex-wrap: wrap !important;
+  }
+  
+  /* Show/hide elements */
+  .hide-tablet {
+    display: none !important;
+  }
+  
+  .show-tablet {
+    display: block !important;
+  }
+}
+
+/* ===== DESKTOP SMALL STYLES (768px - 991px) ===== */
+@media (min-width: 768px) and (max-width: 991px) {
+  /* Grid system - 3-4 columns */
+  .dashboard-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: var(--spacing-lg) !important;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  
+  /* Grid spans for small desktop */
+  .grid-span-3 {
+    grid-column: span 2 !important;
+  }
+  
+  .grid-span-6 {
+    grid-column: span 4 !important;
+  }
+  
+  .grid-span-8,
+  .grid-span-9,
+  .grid-span-12 {
+    grid-column: span 4 !important;
+  }
+  
+  /* Sidebar adjustments */
+  .app-sidebar {
+    width: calc(var(--sidebar-width) * 0.8) !important;
+  }
+  
+  .app-layout {
+    grid-template-columns: calc(var(--sidebar-width) * 0.8) 1fr !important;
+  }
+}
+
+/* ===== DESKTOP MEDIUM STYLES (992px - 1199px) ===== */
+@media (min-width: 992px) and (max-width: 1199px) {
+  /* Grid system - full 12 column */
+  .dashboard-grid {
+    grid-template-columns: repeat(8, 1fr) !important;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+  
+  /* Grid spans for medium desktop */
+  .grid-span-3 {
+    grid-column: span 3 !important;
+  }
+  
+  .grid-span-4 {
+    grid-column: span 4 !important;
+  }
+  
+  .grid-span-6 {
+    grid-column: span 6 !important;
+  }
+  
+  .grid-span-8,
+  .grid-span-9 {
+    grid-column: span 8 !important;
+  }
+  
+  .grid-span-12 {
+    grid-column: span 8 !important;
+  }
+}
+
+/* ===== DESKTOP LARGE STYLES (1200px+) ===== */
+@media (min-width: 1200px) {
+  /* Full grid system */
+  .dashboard-grid {
+    grid-template-columns: repeat(12, 1fr) !important;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(6, 1fr) !important;
+  }
+  
+  /* All grid spans work as intended */
+  .grid-span-1 { grid-column: span 1 !important; }
+  .grid-span-2 { grid-column: span 2 !important; }
+  .grid-span-3 { grid-column: span 3 !important; }
+  .grid-span-4 { grid-column: span 4 !important; }
+  .grid-span-5 { grid-column: span 5 !important; }
+  .grid-span-6 { grid-column: span 6 !important; }
+  .grid-span-7 { grid-column: span 7 !important; }
+  .grid-span-8 { grid-column: span 8 !important; }
+  .grid-span-9 { grid-column: span 9 !important; }
+  .grid-span-10 { grid-column: span 10 !important; }
+  .grid-span-11 { grid-column: span 11 !important; }
+  .grid-span-12 { grid-column: span 12 !important; }
+  
+  /* Larger spacing on large screens */
+  .app-main {
+    padding: var(--spacing-xl) !important;
+  }
+  
+  .dashboard-grid {
+    gap: var(--spacing-xl) !important;
+  }
+}
+
+/* ===== ULTRA-WIDE STYLES (1400px+) ===== */
+@media (min-width: 1400px) {
+  /* Constrain content width on ultra-wide screens */
+  .content-container {
+    max-width: 1400px !important;
+  }
+  
+  /* Increase spacing */
+  .dashboard-grid {
+    gap: var(--spacing-xxl) !important;
+  }
+  
+  .app-main {
+    padding: var(--spacing-xxl) !important;
+  }
+}
+
+/* ===== HORIZONTAL SCROLLING FIXES ===== */
+
+/* Prevent horizontal overflow */
+html,
+body {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+}
+
+.app-layout,
+.app-main,
+.content-container {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+}
+
+/* Fix wide content */
+.prevent-overflow {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+}
+
+/* Table responsiveness */
+.table-responsive {
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.table-responsive table {
+  min-width: 600px !important;
+  width: 100% !important;
+}
+
+/* Chart and graph responsiveness */
+.chart-container {
+  overflow-x: auto !important;
+  max-width: 100% !important;
+}
+
+.chart-container > * {
+  min-width: 300px !important;
+}
+
+/* Image responsiveness */
+img,
+video,
+canvas,
+svg {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* ===== SPACING OPTIMIZATION ===== */
+
+/* Mobile spacing optimization */
+@media (max-width: 575px) {
+  .spacing-mobile-xs { margin: var(--spacing-xs) !important; }
+  .spacing-mobile-sm { margin: var(--spacing-sm) !important; }
+  .spacing-mobile-md { margin: var(--spacing-md) !important; }
+  
+  .padding-mobile-xs { padding: var(--spacing-xs) !important; }
+  .padding-mobile-sm { padding: var(--spacing-sm) !important; }
+  .padding-mobile-md { padding: var(--spacing-md) !important; }
+  
+  .gap-mobile-xs { gap: var(--spacing-xs) !important; }
+  .gap-mobile-sm { gap: var(--spacing-sm) !important; }
+  .gap-mobile-md { gap: var(--spacing-md) !important; }
+}
+
+/* Tablet spacing optimization */
+@media (min-width: 576px) and (max-width: 991px) {
+  .spacing-tablet-sm { margin: var(--spacing-sm) !important; }
+  .spacing-tablet-md { margin: var(--spacing-md) !important; }
+  .spacing-tablet-lg { margin: var(--spacing-lg) !important; }
+  
+  .padding-tablet-sm { padding: var(--spacing-sm) !important; }
+  .padding-tablet-md { padding: var(--spacing-md) !important; }
+  .padding-tablet-lg { padding: var(--spacing-lg) !important; }
+  
+  .gap-tablet-sm { gap: var(--spacing-sm) !important; }
+  .gap-tablet-md { gap: var(--spacing-md) !important; }
+  .gap-tablet-lg { gap: var(--spacing-lg) !important; }
+}
+
+/* Desktop spacing optimization */
+@media (min-width: 992px) {
+  .spacing-desktop-md { margin: var(--spacing-md) !important; }
+  .spacing-desktop-lg { margin: var(--spacing-lg) !important; }
+  .spacing-desktop-xl { margin: var(--spacing-xl) !important; }
+  
+  .padding-desktop-md { padding: var(--spacing-md) !important; }
+  .padding-desktop-lg { padding: var(--spacing-lg) !important; }
+  .padding-desktop-xl { padding: var(--spacing-xl) !important; }
+  
+  .gap-desktop-md { gap: var(--spacing-md) !important; }
+  .gap-desktop-lg { gap: var(--spacing-lg) !important; }
+  .gap-desktop-xl { gap: var(--spacing-xl) !important; }
+}
+
+/* ===== RESPONSIVE UTILITIES ===== */
+
+/* Display utilities */
+.show-mobile { display: none !important; }
+.show-tablet { display: none !important; }
+.show-desktop { display: block !important; }
+
+@media (max-width: 575px) {
+  .show-mobile { display: block !important; }
+  .hide-mobile { display: none !important; }
+}
+
+@media (min-width: 576px) and (max-width: 991px) {
+  .show-tablet { display: block !important; }
+  .hide-tablet { display: none !important; }
+}
+
+@media (min-width: 992px) {
+  .show-desktop { display: block !important; }
+  .hide-desktop { display: none !important; }
+}
+
+/* Flex direction utilities */
+.flex-mobile-column {
+  flex-direction: row !important;
+}
+
+@media (max-width: 767px) {
+  .flex-mobile-column {
+    flex-direction: column !important;
+  }
+}
+
+/* Text alignment utilities */
+.text-mobile-center {
+  text-align: left !important;
+}
+
+@media (max-width: 575px) {
+  .text-mobile-center {
+    text-align: center !important;
+  }
+}
+
+/* Width utilities */
+.w-mobile-full {
+  width: auto !important;
+}
+
+@media (max-width: 575px) {
+  .w-mobile-full {
+    width: 100% !important;
+  }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .app-sidebar,
+  .app-header,
+  .hide-print {
+    display: none !important;
+  }
+  
+  .app-layout {
+    grid-template-areas: "main" !important;
+    grid-template-columns: 1fr !important;
+  }
+  
+  .app-main {
+    padding: 0 !important;
+  }
+  
+  .dashboard-card,
+  .MuiCard-root {
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+    background: white !important;
+    color: black !important;
+    page-break-inside: avoid !important;
+  }
+}

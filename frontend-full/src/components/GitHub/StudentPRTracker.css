@@ -1,0 +1,515 @@
+/* Student PR Tracker Styles */
+
+.student-pr-tracker {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  border-radius: 15px;
+  padding: 1.2rem;
+  color: #00ff88;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.student-pr-tracker:hover {
+  border-color: var(--primary-cyan);
+  box-shadow: 0 8px 25px rgba(0, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Compact Version */
+.student-pr-tracker.compact {
+  padding: 12px;
+  min-height: 80px;
+}
+
+.compact-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.compact-content .student-info {
+  flex: 1;
+}
+
+.compact-content .student-name {
+  display: block;
+  font-weight: bold;
+  color: #00ff88;
+  margin-bottom: 2px;
+}
+
+.compact-content .github-username {
+  display: block;
+  font-size: 12px;
+  color: #888;
+}
+
+.compact-content .pr-stats {
+  display: flex;
+  gap: 15px;
+}
+
+.compact-content .stat-item {
+  text-align: center;
+}
+
+.compact-content .stat-value {
+  display: block;
+  font-size: 18px;
+  font-weight: bold;
+  color: #00ff88;
+}
+
+.compact-content .stat-label {
+  display: block;
+  font-size: 10px;
+  color: #888;
+}
+
+.progress-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.progress-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.progress-circle::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  background: #1a1a2e;
+  border-radius: 50%;
+}
+
+.progress-score {
+  position: relative;
+  z-index: 1;
+  font-size: 10px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.trend-icon {
+  font-size: 16px;
+}
+
+/* Loading State */
+.student-pr-tracker.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 80px;
+  color: #888;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #333;
+  border-top: 2px solid #00ff88;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error State */
+.student-pr-tracker.error {
+  border-color: #ff4444;
+  background: rgba(255, 68, 68, 0.1);
+}
+
+.error-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #ff4444;
+}
+
+.error-icon {
+  font-size: 18px;
+}
+
+.error-message {
+  flex: 1;
+  font-size: 14px;
+}
+
+.retry-btn {
+  background: #ff4444;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/* No Data State */
+.student-pr-tracker.no-data {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+  color: #888;
+  font-style: italic;
+}
+
+/* Detailed Version */
+.student-pr-tracker.detailed {
+  padding: 20px;
+}
+
+.tracker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.tracker-header .student-info h3 {
+  margin: 0 0 5px 0;
+  color: #00ff88;
+  font-size: 20px;
+}
+
+.tracker-header .github-username {
+  color: #888;
+  margin: 0;
+  font-size: 14px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.details-toggle, .refresh-btn {
+  background: #333;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.details-toggle:hover, .refresh-btn:hover {
+  background: #555;
+}
+
+/* PR Overview */
+.pr-overview {
+  margin-bottom: 20px;
+}
+
+.pr-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.stat-card {
+  background: #333;
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  background: #444;
+}
+
+.stat-card.total {
+  border-left: 3px solid #00ff88;
+}
+
+.stat-card.open {
+  border-left: 3px solid #ffaa00;
+}
+
+.stat-card.merged {
+  border-left: 3px solid #00ff88;
+}
+
+.stat-card.closed {
+  border-left: 3px solid #ff4444;
+}
+
+.stat-icon {
+  font-size: 20px;
+}
+
+.stat-content .stat-value {
+  display: block;
+  font-size: 24px;
+  font-weight: bold;
+  color: #00ff88;
+  line-height: 1;
+}
+
+.stat-content .stat-label {
+  display: block;
+  font-size: 12px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.activity-info {
+  background: #333;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.activity-label {
+  color: #888;
+  font-size: 14px;
+}
+
+.activity-date {
+  color: #00ff88;
+  font-weight: bold;
+}
+
+/* Progress Analysis */
+.progress-analysis {
+  background: rgba(0, 255, 136, 0.05);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.progress-header h4 {
+  margin: 0;
+  color: #00ff88;
+}
+
+.progress-score-display {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.score-circle {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.trend-indicator {
+  background: #333;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  color: #ccc;
+}
+
+.insights {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.insights-section, .recommendations-section {
+  background: #333;
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.insights-section h5, .recommendations-section h5 {
+  margin: 0 0 10px 0;
+  color: #00ff88;
+  font-size: 14px;
+}
+
+.insights-section ul, .recommendations-section ul {
+  margin: 0;
+  padding-left: 15px;
+  color: #ccc;
+}
+
+.insights-section li, .recommendations-section li {
+  margin-bottom: 5px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* PR Details */
+.pr-details {
+  border-top: 1px solid #333;
+  padding-top: 20px;
+}
+
+.pr-details h4 {
+  margin: 0 0 15px 0;
+  color: #00ff88;
+}
+
+.pr-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pr-item {
+  background: #333;
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.pr-item:hover {
+  background: #444;
+}
+
+.pr-item.open {
+  border-left: 3px solid #ffaa00;
+}
+
+.pr-item.closed {
+  border-left: 3px solid #ff4444;
+}
+
+.pr-info {
+  flex: 1;
+}
+
+.pr-title a {
+  color: #00ff88;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.pr-title a:hover {
+  text-decoration: underline;
+}
+
+.pr-meta {
+  display: flex;
+  gap: 15px;
+  margin-top: 5px;
+  font-size: 12px;
+  color: #888;
+}
+
+.pr-repo {
+  color: #ccc;
+}
+
+.pr-number {
+  color: #888;
+}
+
+.pr-date {
+  color: #888;
+}
+
+.pr-status {
+  display: flex;
+  align-items: center;
+}
+
+.status-badge {
+  background: #555;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.status-badge.open {
+  background: #ffaa00;
+  color: #000;
+}
+
+.status-badge.closed {
+  background: #ff4444;
+}
+
+.pr-list-footer {
+  text-align: center;
+  padding: 10px;
+  color: #888;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .compact-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .compact-content .pr-stats {
+    align-self: stretch;
+    justify-content: space-around;
+  }
+
+  .tracker-header {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .header-actions {
+    align-self: stretch;
+    justify-content: space-between;
+  }
+
+  .pr-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .insights {
+    grid-template-columns: 1fr;
+  }
+
+  .pr-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .pr-meta {
+    flex-wrap: wrap;
+  }
+}

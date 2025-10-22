@@ -1,0 +1,441 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "SBOM Tracking Dashboard",
+    "tags": ["security", "sbom", "supply-chain"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "SBOM Generation Overview",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sbom_generation_total",
+            "legendFormat": "Total SBOMs Generated"
+          },
+          {
+            "expr": "sbom_services_total",
+            "legendFormat": "Services Tracked"
+          },
+          {
+            "expr": "sbom_vulnerabilities_total",
+            "legendFormat": "Total Vulnerabilities"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "displayMode": "list",
+              "orientation": "horizontal"
+            },
+            "mappings": [],
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "SBOM Generation Timeline",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "increase(sbom_generation_total[1h])",
+            "legendFormat": "SBOMs Generated per Hour"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 10,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "vis": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "never",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "Service SBOM Status",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "sbom_service_status",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "align": "auto",
+              "displayMode": "auto"
+            },
+            "mappings": [
+              {
+                "options": {
+                  "0": {
+                    "color": "red",
+                    "index": 0,
+                    "text": "Missing"
+                  },
+                  "1": {
+                    "color": "green",
+                    "index": 1,
+                    "text": "Current"
+                  },
+                  "2": {
+                    "color": "yellow",
+                    "index": 2,
+                    "text": "Outdated"
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 8
+        },
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true,
+                "job": true,
+                "instance": true
+              },
+              "indexByName": {},
+              "renameByName": {
+                "service": "Service Name",
+                "Value": "SBOM Status",
+                "last_generated": "Last Generated",
+                "file_count": "SBOM Files",
+                "vulnerability_count": "Vulnerabilities"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Vulnerability Distribution by Service",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum by (service) (sbom_vulnerabilities_by_severity{severity=\"critical\"})",
+            "legendFormat": "{{service}} - Critical"
+          },
+          {
+            "expr": "sum by (service) (sbom_vulnerabilities_by_severity{severity=\"high\"})",
+            "legendFormat": "{{service}} - High"
+          },
+          {
+            "expr": "sum by (service) (sbom_vulnerabilities_by_severity{severity=\"medium\"})",
+            "legendFormat": "{{service}} - Medium"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "vis": false
+              }
+            },
+            "mappings": []
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 16
+        }
+      },
+      {
+        "id": 5,
+        "title": "License Compliance Status",
+        "type": "bargauge",
+        "targets": [
+          {
+            "expr": "sbom_license_compliance_score",
+            "legendFormat": "{{service}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "displayMode": "gradient",
+              "orientation": "horizontal"
+            },
+            "max": 100,
+            "min": 0,
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 70
+                },
+                {
+                  "color": "green",
+                  "value": 90
+                }
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 16
+        }
+      },
+      {
+        "id": 6,
+        "title": "SBOM File Sizes",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "sbom_file_size_bytes",
+            "legendFormat": "{{service}} - {{format}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "File Size (Bytes)",
+              "axisPlacement": "auto",
+              "drawStyle": "line",
+              "fillOpacity": 10,
+              "lineWidth": 1,
+              "pointSize": 5,
+              "showPoints": "never",
+              "spanNulls": false
+            },
+            "unit": "bytes"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 24
+        }
+      },
+      {
+        "id": 7,
+        "title": "Supply Chain Risk Score",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "sbom_supply_chain_risk_score",
+            "legendFormat": "Overall Risk Score"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "max": 100,
+            "min": 0,
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 40
+                },
+                {
+                  "color": "orange",
+                  "value": 70
+                },
+                {
+                  "color": "red",
+                  "value": 85
+                }
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 0,
+          "y": 32
+        }
+      },
+      {
+        "id": 8,
+        "title": "Dependency Age Distribution",
+        "type": "histogram",
+        "targets": [
+          {
+            "expr": "sbom_dependency_age_days",
+            "legendFormat": "Dependency Age (Days)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "vis": false
+              }
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 8,
+          "y": 32
+        }
+      },
+      {
+        "id": 9,
+        "title": "SBOM Generation Errors",
+        "type": "logs",
+        "targets": [
+          {
+            "expr": "{job=\"sbom-generator\"} |= \"ERROR\"",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 16,
+          "y": 32
+        }
+      }
+    ],
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "SBOM Tracking Dashboard",
+    "uid": "sbom-tracking",
+    "version": 1,
+    "weekStart": ""
+  },
+  "meta": {
+    "type": "db",
+    "canSave": true,
+    "canEdit": true,
+    "canAdmin": true,
+    "canStar": true,
+    "slug": "sbom-tracking-dashboard",
+    "url": "/d/sbom-tracking/sbom-tracking-dashboard",
+    "expires": "0001-01-01T00:00:00Z",
+    "created": "2024-01-15T10:00:00Z",
+    "updated": "2024-01-15T10:00:00Z",
+    "updatedBy": "admin",
+    "createdBy": "admin",
+    "version": 1,
+    "hasAcl": false,
+    "isFolder": false,
+    "folderId": 0,
+    "folderTitle": "General",
+    "folderUrl": "",
+    "provisioned": false,
+    "provisionedExternalId": ""
+  }
+}

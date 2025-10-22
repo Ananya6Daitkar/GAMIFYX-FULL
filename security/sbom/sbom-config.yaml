@@ -1,0 +1,538 @@
+# GamifyX SBOM Security Tracking Configuration
+
+# Project information
+project:
+  name: "GamifyX AIOps Learning Platform"
+  version: "1.0.0"
+  description: "Cyberpunk-themed AIOps learning platform with gamification"
+  organization: "GamifyX Security Team"
+  contact: "security@gamifyx.com"
+
+# Database configuration
+database:
+  path: "security/sbom/sbom_security.db"
+  backup_enabled: true
+  backup_interval_hours: 24
+  retention_days: 365
+
+# SBOM generation settings
+sbom_generation:
+  formats:
+    - "cyclonedx"
+    - "spdx"
+  
+  include_dev_dependencies: false
+  include_transitive_dependencies: true
+  include_file_hashes: true
+  include_vulnerability_data: true
+  include_license_data: true
+  include_supplier_data: true
+  
+  component_types:
+    frontend: "application"
+    services: "application"
+    infrastructure: "container"
+    monitoring: "application"
+  
+  excluded_paths:
+    - "node_modules"
+    - ".git"
+    - "dist"
+    - "build"
+    - "coverage"
+    - "logs"
+    - "tmp"
+    - "*.test.js"
+    - "*.test.ts"
+    - "*.spec.js"
+    - "*.spec.ts"
+
+# Security tracking configuration
+security_tracking:
+  # Vulnerability sources
+  vulnerability_sources:
+    osv:
+      enabled: true
+      api_url: "https://api.osv.dev"
+      rate_limit: 100
+    
+    nvd:
+      enabled: true
+      api_url: "https://services.nvd.nist.gov/rest/json/cves/2.0"
+      api_key: "${NVD_API_KEY}"
+      rate_limit: 50
+    
+    github:
+      enabled: true
+      api_url: "https://api.github.com"
+      token: "${GITHUB_TOKEN}"
+      rate_limit: 5000
+    
+    snyk:
+      enabled: false
+      api_url: "https://api.snyk.io"
+      token: "${SNYK_TOKEN}"
+      rate_limit: 1000
+    
+    sonatype:
+      enabled: true
+      api_url: "https://ossindex.sonatype.org/api/v3"
+      rate_limit: 120
+  
+  # Reputation services
+  reputation_services:
+    virustotal:
+      enabled: false
+      api_key: "${VIRUSTOTAL_API_KEY}"
+      api_url: "https://www.virustotal.com/vtapi/v2"
+      rate_limit: 4
+    
+    malware_bazaar:
+      enabled: true
+      api_url: "https://mb-api.abuse.ch/api/v1"
+      rate_limit: 100
+    
+    package_analysis:
+      enabled: true
+      api_url: "https://api.deps.dev"
+      rate_limit: 100
+  
+  # Risk scoring weights
+  risk_scoring:
+    vulnerability_weight: 0.4
+    age_weight: 0.1
+    popularity_weight: 0.1
+    maintainer_weight: 0.2
+    supply_chain_weight: 0.2
+  
+  # Risk thresholds
+  risk_thresholds:
+    critical: 9.0
+    high: 7.0
+    medium: 4.0
+    low: 2.0
+
+# Continuous monitoring configuration
+continuous_monitoring:
+  enabled: true
+  
+  # File system monitoring
+  watch_paths:
+    - "./"
+    - "./security/sbom"
+  
+  # Scan intervals
+  scan_interval_minutes: 60
+  vulnerability_check_interval_seconds: 3600  # 1 hour
+  compliance_check_interval_seconds: 86400   # 24 hours
+  
+  # Alert thresholds
+  alert_thresholds:
+    risk_score: 7.0
+    critical_vulnerabilities: 0
+    high_vulnerabilities: 5
+    malware_detection: 0
+    compliance_score: 0.8
+  
+  # Notification channels
+  notifications:
+    slack:
+      enabled: true
+      webhook_url: "${SLACK_WEBHOOK_URL}"
+      channel: "#security-alerts"
+      min_severity: "warning"
+      notify_on:
+        - "critical_vulnerability"
+        - "malware_detected"
+        - "compliance_violation"
+        - "security_threshold_exceeded"
+    
+    email:
+      enabled: false
+      smtp_server: "smtp.company.com"
+      smtp_port: 587
+      username: "${EMAIL_USERNAME}"
+      password: "${EMAIL_PASSWORD}"
+      from_address: "security@gamifyx.com"
+      to_addresses:
+        - "security-team@gamifyx.com"
+        - "devops@gamifyx.com"
+      min_severity: "critical"
+    
+    webhook:
+      enabled: true
+      url: "${SECURITY_WEBHOOK_URL}"
+      headers:
+        Authorization: "Bearer ${WEBHOOK_TOKEN}"
+        Content-Type: "application/json"
+      min_severity: "warning"
+    
+    pagerduty:
+      enabled: false
+      integration_key: "${PAGERDUTY_INTEGRATION_KEY}"
+      min_severity: "critical"
+  
+  # Automated responses
+  automated_responses:
+    enabled: true
+    rules:
+      - name: "Critical Vulnerability Response"
+        event_types: ["critical_vulnerability"]
+        min_severity: "critical"
+        action_type: "create_ticket"
+        action_data:
+          system: "jira"
+          project: "SEC"
+          issue_type: "Security Incident"
+          priority: "Critical"
+      
+      - name: "Malware Detection Response"
+        event_types: ["malware_detected"]
+        min_severity: "emergency"
+        action_type: "quarantine_system"
+        action_data:
+          isolation_level: "network"
+          notification_required: true
+      
+      - name: "High Risk Component Block"
+        event_types: ["security_threshold_exceeded"]
+        component_patterns: [".*malicious.*", ".*suspicious.*"]
+        action_type: "block_component"
+        action_data:
+          block_type: "dependency_installation"
+          alert_team: true
+
+# Supply chain analysis configuration
+supply_chain_analysis:
+  enabled: true
+  
+  # Package registry clients
+  package_registries:
+    npm:
+      enabled: true
+      api_url: "https://registry.npmjs.org"
+      rate_limit: 100
+    
+    pypi:
+      enabled: true
+      api_url: "https://pypi.org/pypi"
+      rate_limit: 100
+    
+    maven:
+      enabled: true
+      api_url: "https://search.maven.org/solrsearch/select"
+      rate_limit: 100
+    
+    nuget:
+      enabled: true
+      api_url: "https://api.nuget.org/v3-flatcontainer"
+      rate_limit: 100
+    
+    rubygems:
+      enabled: true
+      api_url: "https://rubygems.org/api/v1"
+      rate_limit: 100
+  
+  # Trust databases
+  trust_databases:
+    openssf:
+      enabled: true
+      api_url: "https://api.securityscorecards.dev"
+      rate_limit: 100
+    
+    sigstore:
+      enabled: true
+      api_url: "https://rekor.sigstore.dev"
+      rate_limit: 100
+  
+  # Analysis settings
+  analysis_settings:
+    max_dependency_depth: 10
+    include_dev_dependencies: false
+    circular_dependency_detection: true
+    single_point_of_failure_detection: true
+    typosquatting_detection: true
+    
+    # Maintainer reputation factors
+    maintainer_factors:
+      min_packages: 1
+      min_downloads: 1000
+      max_security_incidents: 3
+      min_account_age_days: 90
+    
+    # Package health factors
+    package_factors:
+      min_age_days: 30
+      max_age_days: 2000
+      min_downloads: 1000
+      min_stars: 10
+      max_vulnerabilities: 5
+
+# Compliance tracking configuration
+compliance_tracking:
+  enabled: true
+  
+  # Supported frameworks
+  frameworks:
+    - "nist_csf"
+    - "iso_27001"
+    - "soc2"
+    - "gdpr"
+    - "ferpa"
+  
+  # Assessment settings
+  assessment_settings:
+    automated_assessment: true
+    manual_review_required: true
+    evidence_collection: true
+    gap_analysis: true
+    
+    # Assessment intervals
+    assessment_intervals:
+      nist_csf: 90  # days
+      iso_27001: 180
+      soc2: 90
+      gdpr: 180
+      ferpa: 365
+  
+  # Compliance thresholds
+  compliance_thresholds:
+    minimum_score: 80.0
+    critical_gap_threshold: 5
+    remediation_sla_days: 30
+  
+  # Evidence collection
+  evidence_collection:
+    automated: true
+    retention_days: 1095  # 3 years
+    encryption_required: true
+    
+    evidence_types:
+      - "sbom_data"
+      - "vulnerability_scans"
+      - "security_assessments"
+      - "remediation_records"
+      - "audit_logs"
+
+# Reporting configuration
+reporting:
+  enabled: true
+  
+  # Output formats
+  formats:
+    - "json"
+    - "html"
+    - "csv"
+    - "pdf"
+  
+  # Report types
+  report_types:
+    - "security_analysis"
+    - "supply_chain_analysis"
+    - "compliance_assessment"
+    - "vulnerability_report"
+    - "risk_assessment"
+  
+  # Report scheduling
+  scheduling:
+    daily_reports:
+      - "security_summary"
+    
+    weekly_reports:
+      - "vulnerability_report"
+      - "supply_chain_analysis"
+    
+    monthly_reports:
+      - "compliance_assessment"
+      - "risk_assessment"
+    
+    quarterly_reports:
+      - "comprehensive_security_review"
+  
+  # Report distribution
+  distribution:
+    email_reports: true
+    dashboard_updates: true
+    api_endpoints: true
+    file_exports: true
+  
+  # Dashboard settings
+  dashboard:
+    enabled: true
+    refresh_interval_minutes: 15
+    real_time_updates: true
+    
+    widgets:
+      - "risk_score_gauge"
+      - "vulnerability_trends"
+      - "compliance_scores"
+      - "supply_chain_health"
+      - "component_inventory"
+      - "security_alerts"
+    
+    themes:
+      default: "cyberpunk"
+      alternatives: ["dark", "light", "corporate"]
+
+# Integration settings
+integrations:
+  # CI/CD integration
+  cicd:
+    github_actions:
+      enabled: true
+      workflow_file: ".github/workflows/sbom-security.yml"
+      trigger_on: ["push", "pull_request", "schedule"]
+    
+    jenkins:
+      enabled: false
+      pipeline_script: "security/sbom/jenkins-pipeline.groovy"
+    
+    gitlab_ci:
+      enabled: false
+      config_file: ".gitlab-ci.yml"
+  
+  # Security tools integration
+  security_tools:
+    trivy:
+      enabled: true
+      config_file: "security/trivy/trivy-config.yaml"
+      output_format: "json"
+    
+    grype:
+      enabled: false
+      config_file: "security/grype/grype-config.yaml"
+    
+    syft:
+      enabled: true
+      config_file: "security/syft/syft-config.yaml"
+  
+  # Monitoring integration
+  monitoring:
+    prometheus:
+      enabled: true
+      pushgateway_url: "${PROMETHEUS_PUSHGATEWAY_URL}"
+      job_name: "sbom-security"
+      metrics_port: 8000
+    
+    grafana:
+      enabled: true
+      api_url: "${GRAFANA_API_URL}"
+      api_key: "${GRAFANA_API_KEY}"
+      dashboard_id: "sbom-security"
+    
+    elasticsearch:
+      enabled: false
+      url: "${ELASTICSEARCH_URL}"
+      index: "sbom-security"
+      username: "${ELASTICSEARCH_USERNAME}"
+      password: "${ELASTICSEARCH_PASSWORD}"
+  
+  # Ticketing systems
+  ticketing:
+    jira:
+      enabled: false
+      url: "${JIRA_URL}"
+      username: "${JIRA_USERNAME}"
+      token: "${JIRA_TOKEN}"
+      project: "SEC"
+      issue_type: "Security Vulnerability"
+    
+    servicenow:
+      enabled: false
+      instance_url: "${SERVICENOW_URL}"
+      username: "${SERVICENOW_USERNAME}"
+      password: "${SERVICENOW_PASSWORD}"
+      table: "incident"
+    
+    github_issues:
+      enabled: true
+      repository: "gamifyx/platform"
+      token: "${GITHUB_TOKEN}"
+      labels: ["security", "sbom", "vulnerability"]
+
+# Performance settings
+performance:
+  # Parallel processing
+  max_workers: 10
+  batch_size: 50
+  timeout_seconds: 300
+  
+  # Caching
+  cache_enabled: true
+  cache_ttl_seconds: 3600
+  cache_size_mb: 100
+  
+  # Rate limiting
+  global_rate_limit: 1000  # requests per hour
+  per_source_rate_limit: 100
+  
+  # Memory management
+  max_memory_mb: 512
+  gc_threshold: 0.8
+
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  handlers:
+    console:
+      enabled: true
+      level: "INFO"
+    
+    file:
+      enabled: true
+      level: "DEBUG"
+      filename: "security/logs/sbom-security.log"
+      max_size_mb: 10
+      backup_count: 5
+    
+    syslog:
+      enabled: false
+      address: "localhost:514"
+      facility: "local0"
+  
+  # Audit logging
+  audit_logging:
+    enabled: true
+    filename: "security/logs/sbom-audit.log"
+    include_sensitive_data: false
+    retention_days: 2555  # 7 years
+
+# Security settings
+security:
+  # Encryption
+  encryption:
+    enabled: true
+    algorithm: "AES-256-GCM"
+    key_rotation_days: 90
+  
+  # Authentication
+  authentication:
+    required: true
+    methods: ["api_key", "jwt", "oauth2"]
+    session_timeout_minutes: 60
+  
+  # Authorization
+  authorization:
+    rbac_enabled: true
+    roles:
+      - "admin"
+      - "security_analyst"
+      - "developer"
+      - "viewer"
+  
+  # API security
+  api_security:
+    rate_limiting: true
+    input_validation: true
+    output_sanitization: true
+    cors_enabled: true
+    allowed_origins: ["https://gamifyx.com"]
+  
+  # Data protection
+  data_protection:
+    pii_detection: true
+    data_masking: true
+    secure_deletion: true
+    backup_encryption: true

@@ -1,0 +1,294 @@
+# GamifyX Alert Correlation and Escalation Rules
+# This configuration defines how alerts should be correlated and escalated
+
+correlation_rules:
+  # Student Risk Correlation
+  - name: student_risk_correlation
+    description: "Correlate multiple student risk indicators"
+    conditions:
+      - alert: HighRiskStudentCount
+      - alert: LowStudentEngagement
+      - alert: StudentRiskScoreSpike
+    correlation_window: "10m"
+    action:
+      escalate_to: critical
+      notification_channels:
+        - gamifyx-critical-slack
+        - gamifyx-teacher-email
+        - gamifyx-pagerduty
+      custom_message: "Multiple student risk indicators detected - immediate intervention required"
+
+  # System Performance Correlation
+  - name: system_performance_correlation
+    description: "Correlate system performance issues"
+    conditions:
+      - alert: HighCPUUsage
+      - alert: HighMemoryUsage
+      - alert: HighResponseTime
+    correlation_window: "5m"
+    action:
+      escalate_to: critical
+      notification_channels:
+        - gamifyx-critical-slack
+        - gamifyx-pagerduty
+      custom_message: "System performance degradation detected across multiple metrics"
+
+  # Gamification System Failure
+  - name: gamification_system_failure
+    description: "Correlate gamification system issues"
+    conditions:
+      - alert: BadgeSystemDown
+      - alert: LeaderboardStale
+      - alert: AchievementSystemFailure
+    correlation_window: "15m"
+    action:
+      escalate_to: critical
+      notification_channels:
+        - gamifyx-critical-slack
+        - gamifyx-engagement-discord
+      custom_message: "Gamification system experiencing multiple failures - student engagement at risk"
+
+  # AI/ML System Issues
+  - name: ai_system_correlation
+    description: "Correlate AI/ML system performance issues"
+    conditions:
+      - alert: ModelAccuracyDrop
+      - alert: HighInferenceLatency
+      - alert: ModelPredictionFailures
+    correlation_window: "10m"
+    action:
+      escalate_to: warning
+      notification_channels:
+        - gamifyx-warning-slack
+        - gamifyx-teams
+      custom_message: "AI/ML system performance degradation - may impact feedback quality"
+
+escalation_policies:
+  # Critical Alert Escalation
+  - name: critical_escalation
+    description: "Escalation policy for critical alerts"
+    levels:
+      - level: 1
+        wait_time: "5m"
+        notification_channels:
+          - gamifyx-critical-slack
+          - gamifyx-teacher-email
+      - level: 2
+        wait_time: "15m"
+        notification_channels:
+          - gamifyx-pagerduty
+          - gamifyx-teams
+      - level: 3
+        wait_time: "30m"
+        notification_channels:
+          - gamifyx-webhook
+        custom_actions:
+          - auto_scale_services
+          - create_incident_ticket
+
+  # Student Risk Escalation
+  - name: student_risk_escalation
+    description: "Escalation policy for student risk alerts"
+    levels:
+      - level: 1
+        wait_time: "2m"
+        notification_channels:
+          - gamifyx-teacher-email
+      - level: 2
+        wait_time: "10m"
+        notification_channels:
+          - gamifyx-warning-slack
+          - gamifyx-engagement-discord
+      - level: 3
+        wait_time: "30m"
+        notification_channels:
+          - gamifyx-teams
+        custom_actions:
+          - auto_create_intervention
+          - notify_academic_advisor
+
+  # System Performance Escalation
+  - name: performance_escalation
+    description: "Escalation policy for performance alerts"
+    levels:
+      - level: 1
+        wait_time: "3m"
+        notification_channels:
+          - gamifyx-warning-slack
+      - level: 2
+        wait_time: "10m"
+        notification_channels:
+          - gamifyx-critical-slack
+          - gamifyx-pagerduty
+      - level: 3
+        wait_time: "20m"
+        notification_channels:
+          - gamifyx-teams
+        custom_actions:
+          - auto_scale_infrastructure
+          - enable_circuit_breakers
+
+alert_routing:
+  # Route alerts based on severity and category
+  routing_rules:
+    - match:
+        severity: critical
+        category: student_risk
+      route_to:
+        escalation_policy: student_risk_escalation
+        immediate_notifications:
+          - gamifyx-teacher-email
+          - gamifyx-critical-slack
+
+    - match:
+        severity: critical
+        category: system|performance|reliability
+      route_to:
+        escalation_policy: critical_escalation
+        immediate_notifications:
+          - gamifyx-critical-slack
+          - gamifyx-pagerduty
+
+    - match:
+        severity: warning
+        category: engagement|gamification
+      route_to:
+        escalation_policy: student_risk_escalation
+        immediate_notifications:
+          - gamifyx-engagement-discord
+          - gamifyx-teacher-email
+
+    - match:
+        severity: warning
+        category: ai_performance|ai_reliability
+      route_to:
+        immediate_notifications:
+          - gamifyx-warning-slack
+          - gamifyx-teams
+
+    - match:
+        severity: info
+        category: competition|business_logic
+      route_to:
+        immediate_notifications:
+          - gamifyx-engagement-discord
+
+suppression_rules:
+  # Suppress duplicate alerts
+  - name: duplicate_suppression
+    description: "Suppress duplicate alerts within time window"
+    conditions:
+      same_alert_name: true
+      same_labels: ["service", "instance"]
+    suppression_window: "10m"
+
+  # Suppress flapping alerts
+  - name: flapping_suppression
+    description: "Suppress alerts that fire and resolve repeatedly"
+    conditions:
+      fire_resolve_cycles: 3
+      within_time: "30m"
+    suppression_window: "1h"
+
+  # Maintenance window suppression
+  - name: maintenance_suppression
+    description: "Suppress alerts during maintenance windows"
+    conditions:
+      maintenance_mode: true
+    suppression_window: "unlimited"
+
+notification_templates:
+  # Cyberpunk-themed notification templates
+  critical_template: |
+    🚨 **CRITICAL SYSTEM ALERT** 🚨
+    
+    **ALERT:** {{ .Alert.Summary }}
+    **SYSTEM:** {{ .Alert.Service }}
+    **SEVERITY:** {{ .Alert.Severity }}
+    **TIME:** {{ .Alert.StartsAt }}
+    
+    **DESCRIPTION:**
+    {{ .Alert.Description }}
+    
+    **ACTION REQUIRED:**
+    {{ .Alert.Action }}
+    
+    **DASHBOARD:** {{ .Alert.DashboardURL }}
+    
+    ⚡ *GamifyX Monitoring System* ⚡
+
+  warning_template: |
+    ⚠️ **SYSTEM WARNING** ⚠️
+    
+    **ALERT:** {{ .Alert.Summary }}
+    **SYSTEM:** {{ .Alert.Service }}
+    **CATEGORY:** {{ .Alert.Category }}
+    **TIME:** {{ .Alert.StartsAt }}
+    
+    **DETAILS:**
+    {{ .Alert.Description }}
+    
+    **DASHBOARD:** {{ .Alert.DashboardURL }}
+    
+    🔍 *GamifyX Monitoring System* 🔍
+
+  engagement_template: |
+    🎮 **STUDENT ENGAGEMENT ALERT** 🎮
+    
+    **ALERT:** {{ .Alert.Summary }}
+    **CATEGORY:** {{ .Alert.Category }}
+    **TIME:** {{ .Alert.StartsAt }}
+    
+    **DETAILS:**
+    {{ .Alert.Description }}
+    
+    **RECOMMENDED ACTION:**
+    {{ .Alert.Action }}
+    
+    **TEACHER DASHBOARD:** {{ .Alert.DashboardURL }}
+    
+    🔥 *Keep the engagement fire burning!* 🔥
+
+auto_remediation:
+  # Automatic remediation actions
+  actions:
+    - name: auto_scale_services
+      description: "Automatically scale services under high load"
+      triggers:
+        - HighCPUUsage
+        - HighMemoryUsage
+        - HighResponseTime
+      conditions:
+        consecutive_alerts: 3
+        time_window: "15m"
+      action_script: "/scripts/auto-scale.sh"
+
+    - name: restart_unhealthy_services
+      description: "Restart services that are down"
+      triggers:
+        - ServiceDown
+        - AIFeedbackServiceDown
+      conditions:
+        consecutive_alerts: 2
+        time_window: "5m"
+      action_script: "/scripts/restart-service.sh"
+
+    - name: auto_create_intervention
+      description: "Automatically create teacher intervention for at-risk students"
+      triggers:
+        - StudentRiskScoreSpike
+        - HighRiskStudentCount
+      conditions:
+        consecutive_alerts: 1
+        time_window: "1m"
+      action_script: "/scripts/create-intervention.sh"
+
+    - name: enable_circuit_breakers
+      description: "Enable circuit breakers during system stress"
+      triggers:
+        - HighErrorRate
+        - HighResponseTime
+      conditions:
+        consecutive_alerts: 2
+        time_window: "10m"
+      action_script: "/scripts/enable-circuit-breakers.sh"

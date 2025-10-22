@@ -1,0 +1,375 @@
+apiVersion: 1
+
+groups:
+  - name: system-health
+    orgId: 1
+    folder: System Health
+    interval: 1m
+    rules:
+      - uid: service-down
+        title: Service Down Alert
+        condition: C
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasource:
+              type: prometheus
+              uid: prometheus
+            model:
+              expr: up{job=~".*-service"} == 0
+              interval: ""
+              refId: A
+          - refId: C
+            queryType: ''
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasource:
+              type: __expr__
+              uid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [1]
+                    type: lt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+        noDataState: NoData
+        execErrState: Alerting
+        for: 1m
+        annotations:
+          description: "Service {{$labels.job}} is down"
+          summary: "Critical service outage detected"
+        labels:
+          severity: critical
+          team: platform
+
+      - uid: high-error-rate
+        title: High Error Rate Alert
+        condition: C
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasource:
+              type: prometheus
+              uid: prometheus
+            model:
+              expr: sum(rate(http_requests_total{status=~"5.."}[5m])) by (job) / sum(rate(http_requests_total[5m])) by (job) * 100
+              interval: ""
+              refId: A
+          - refId: C
+            queryType: ''
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasource:
+              type: __expr__
+              uid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [5]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+        noDataState: NoData
+        execErrState: Alerting
+        for: 2m
+        annotations:
+          description: "Service {{$labels.job}} has error rate of {{$value}}%"
+          summary: "High error rate detected"
+        labels:
+          severity: warning
+          team: platform
+
+      - uid: high-response-time
+        title: High Response Time Alert
+        condition: C
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasource:
+              type: prometheus
+              uid: prometheus
+            model:
+              expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
+              interval: ""
+              refId: A
+          - refId: C
+            queryType: ''
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasource:
+              type: __expr__
+              uid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [2]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+        noDataState: NoData
+        execErrState: Alerting
+        for: 3m
+        annotations:
+          description: "95th percentile response time is {{$value}}s"
+          summary: "High response time detected"
+        labels:
+          severity: warning
+          team: platform
+
+  - name: student-performance
+    orgId: 1
+    folder: Student Analytics
+    interval: 5m
+    rules:
+      - uid: high-risk-student
+        title: High Risk Student Alert
+        condition: C
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasource:
+              type: prometheus
+              uid: prometheus
+            model:
+              expr: aiops_student_risk_score > 0.7
+              interval: ""
+              refId: A
+          - refId: C
+            queryType: ''
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasource:
+              type: __expr__
+              uid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0.7]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+        noDataState: NoData
+        execErrState: Alerting
+        for: 10m
+        annotations:
+          description: "Student {{$labels.user_id}} has risk score of {{$value}}"
+          summary: "High-risk student detected - intervention needed"
+        labels:
+          severity: warning
+          team: education
+          student_id: "{{$labels.user_id}}"
+
+      - uid: low-engagement
+        title: Low Student Engagement Alert
+        condition: C
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasource:
+              type: prometheus
+              uid: prometheus
+            model:
+              expr: avg(aiops_engagement_score) < 30
+              interval: ""
+              refId: A
+          - refId: C
+            queryType: ''
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasource:
+              type: __expr__
+              uid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [30]
+                    type: lt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+        noDataState: NoData
+        execErrState: Alerting
+        for: 30m
+        annotations:
+          description: "Average engagement score is {{$value}}"
+          summary: "Class engagement is critically low"
+        labels:
+          severity: warning
+          team: education
+
+  - name: ai-performance
+    orgId: 1
+    folder: AI Insights
+    interval: 2m
+    rules:
+      - uid: ai-service-down
+        title: AI Service Down Alert
+        condition: C
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasource:
+              type: prometheus
+              uid: prometheus
+            model:
+              expr: up{job="ai-feedback-service"} == 0
+              interval: ""
+              refId: A
+          - refId: C
+            queryType: ''
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasource:
+              type: __expr__
+              uid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [1]
+                    type: lt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+        noDataState: NoData
+        execErrState: Alerting
+        for: 1m
+        annotations:
+          description: "AI Feedback Service is unavailable"
+          summary: "AI service outage - feedback generation stopped"
+        labels:
+          severity: critical
+          team: ai-ml
+
+      - uid: low-feedback-accuracy
+        title: Low AI Feedback Accuracy Alert
+        condition: C
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasource:
+              type: prometheus
+              uid: prometheus
+            model:
+              expr: aiops_feedback_accuracy_score < 0.7
+              interval: ""
+              refId: A
+          - refId: C
+            queryType: ''
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasource:
+              type: __expr__
+              uid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0.7]
+                    type: lt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+        noDataState: NoData
+        execErrState: Alerting
+        for: 15m
+        annotations:
+          description: "AI feedback accuracy is {{$value}}"
+          summary: "AI model performance degraded - retraining may be needed"
+        labels:
+          severity: warning
+          team: ai-ml

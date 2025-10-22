@@ -1,0 +1,36 @@
+# Prometheus Recording Rules for GamifyX AIOps Learning Platform
+
+groups:
+  - name: gamifyx.recording.rules
+    interval: 30s
+    rules:
+      # HTTP Request Rate
+      - record: gamifyx:http_requests:rate5m
+        expr: rate(http_requests_total[5m])
+
+      # HTTP Request Error Rate
+      - record: gamifyx:http_requests:error_rate5m
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m])
+
+      # HTTP Request Duration 95th Percentile
+      - record: gamifyx:http_request_duration:p95_5m
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
+
+      # Service Availability
+      - record: gamifyx:service:availability
+        expr: avg_over_time(up[5m])
+
+  - name: gamifyx.business.rules
+    interval: 60s
+    rules:
+      # Active Users
+      - record: gamifyx:users:active_total
+        expr: sum(gamifyx_websocket_connections_active)
+
+      # Leaderboard Updates Rate
+      - record: gamifyx:leaderboard:update_rate
+        expr: rate(gamifyx_leaderboard_updates_total[5m])
+
+      # Achievement Unlock Rate
+      - record: gamifyx:achievements:unlock_rate
+        expr: rate(gamifyx_achievements_unlocked_total[5m])
