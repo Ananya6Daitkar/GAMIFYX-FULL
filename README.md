@@ -317,4 +317,4 @@ For support and questions:
 
 ---
 
-**Built with ❤️ for DevOps Education**# GAMIFYX-FULL
+**Built with for DevOps Education**# GAMIFYX-FULL

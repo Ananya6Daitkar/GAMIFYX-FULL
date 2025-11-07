@@ -10,7 +10,7 @@ services:
     image: postgres:15
     container_name: aiops-postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       POSTGRES_DB: aiops_learning_platform
       POSTGRES_USER: postgres
@@ -149,8 +149,8 @@ services:
     image: otel/opentelemetry-collector-contrib:latest
     container_name: aiops-otel-collector
     ports:
-      - "4317:4317"   # OTLP gRPC receiver
-      - "4318:4318"   # OTLP HTTP receiver
+      - "4319:4317"   # OTLP gRPC receiver
+      - "4320:4318"   # OTLP HTTP receiver
       - "8888:8888"   # Prometheus metrics
       - "8889:8889"   # Prometheus exporter metrics
     command: ["--config=/etc/otel-collector-config.yaml"]
@@ -494,6 +494,172 @@ services:
     networks:
       - aiops-network
 
+  # AI Registry Service
+  ai-registry-service:
+    build:
+      context: ./services/ai-registry-service
+      dockerfile: Dockerfile
+    container_name: aiops-ai-registry-service
+    ports:
+      - "3009:3009"
+      - "9010:9010" # Metrics port
+    environment:
+      NODE_ENV: development
+      PORT: 3009
+      LOG_LEVEL: info
+      
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: aiops_learning_platform
+      DB_USER: postgres
+      DB_PASSWORD: password
+      DB_SSL: false
+      
+      # JWT
+      JWT_SECRET: aiops-super-secret-jwt-key-for-development-only
+      
+      # Monitoring
+      METRICS_PORT: 9010
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      
+      # CORS Configuration
+      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3009/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aiops-network
+
+  # Model Performance Service
+  model-performance-service:
+    build:
+      context: ./services/model-performance-service
+      dockerfile: Dockerfile
+    container_name: aiops-model-performance-service
+    ports:
+      - "3010:3010"
+      - "9011:9011" # Metrics port
+    environment:
+      NODE_ENV: development
+      PORT: 3010
+      LOG_LEVEL: info
+      
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: aiops_learning_platform
+      DB_USER: postgres
+      DB_PASSWORD: password
+      DB_SSL: false
+      
+      # JWT
+      JWT_SECRET: aiops-super-secret-jwt-key-for-development-only
+      
+      # Monitoring
+      METRICS_PORT: 9011
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      
+      # CORS Configuration
+      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3010/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aiops-network
+
+  # Guardrail Service
+  guardrail-service:
+    build:
+      context: ./services/guardrail-service
+      dockerfile: Dockerfile
+    container_name: aiops-guardrail-service
+    ports:
+      - "3012:3012"
+      - "9012:9012" # Metrics port
+    environment:
+      NODE_ENV: development
+      PORT: 3012
+      LOG_LEVEL: info
+      
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: aiops_learning_platform
+      DB_USER: postgres
+      DB_PASSWORD: password
+      DB_SSL: false
+      
+      # JWT
+      JWT_SECRET: aiops-super-secret-jwt-key-for-development-only
+      
+      # Monitoring
+      METRICS_PORT: 9012
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      
+      # CORS Configuration
+      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3012/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aiops-network
+
+  # AI Integration Service
+  ai-integration-service:
+    build:
+      context: ./services/ai-integration-service
+      dockerfile: Dockerfile
+    container_name: aiops-ai-integration-service
+    ports:
+      - "3011:3011"
+      - "9013:9013" # Metrics port
+    environment:
+      NODE_ENV: development
+      PORT: 3011
+      LOG_LEVEL: info
+      
+      # AI Service URLs
+      AI_REGISTRY_SERVICE_URL: http://ai-registry-service:3009
+      MODEL_PERFORMANCE_SERVICE_URL: http://model-performance-service:3010
+      GUARDRAIL_SERVICE_URL: http://guardrail-service:3012
+      
+      # JWT
+      JWT_SECRET: aiops-super-secret-jwt-key-for-development-only
+      
+      # Monitoring
+      METRICS_PORT: 9013
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      
+      # CORS Configuration
+      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:8080
+    depends_on:
+      - ai-registry-service
+      - model-performance-service
+      - guardrail-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3011/api/health/all"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aiops-network
+
   # Integration Service
   integration-service:
     build:
@@ -515,6 +681,8 @@ services:
       ANALYTICS_SERVICE_URL: http://analytics-service:3006
       AI_FEEDBACK_SERVICE_URL: http://ai-feedback-service:8000
       FEEDBACK_SERVICE_URL: http://feedback-service:3007
+      AI_REGISTRY_SERVICE_URL: http://ai-registry-service:3009
+      MODEL_PERFORMANCE_SERVICE_URL: http://model-performance-service:3010
       
       # JWT
       JWT_SECRET: aiops-super-secret-jwt-key-for-development-only
@@ -533,6 +701,8 @@ services:
       - analytics-service
       - ai-feedback-service
       - feedback-service
+      - ai-registry-service
+      - model-performance-service
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3008/health"]
       interval: 30s
@@ -657,6 +827,10 @@ services:
       ANALYTICS_SERVICE_URL: http://analytics-service:3006
       FEEDBACK_SERVICE_URL: http://feedback-service:3007
       INTEGRATION_SERVICE_URL: http://integration-service:3008
+      AI_REGISTRY_SERVICE_URL: http://ai-registry-service:3009
+      MODEL_PERFORMANCE_SERVICE_URL: http://model-performance-service:3010
+      GUARDRAIL_SERVICE_URL: http://guardrail-service:3012
+      AI_INTEGRATION_SERVICE_URL: http://ai-integration-service:3011
       AI_FEEDBACK_SERVICE_URL: http://ai-feedback-service:8000
       
       # Authentication
@@ -713,6 +887,10 @@ services:
       - analytics-service
       - feedback-service
       - ai-feedback-service
+      - ai-registry-service
+      - model-performance-service
+      - guardrail-service
+      - ai-integration-service
       - integration-service
       - prometheus
       - jaeger

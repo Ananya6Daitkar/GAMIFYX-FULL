@@ -174,6 +174,14 @@ The Security Dashboard provides centralized monitoring and management of securit
 - Threat intelligence integration
 - Incident response coordination
 
+**Screenshots:**
+
+![Security Dashboard Overview](../demo/screenshots/security-dashboard-overview.png)
+*Main security dashboard showing real-time metrics and threat status*
+
+![Vulnerability Management](../demo/screenshots/vulnerability-management.png)
+*Vulnerability tracking interface with severity levels and remediation status*
+
 **API Endpoints:**
 ```bash
 GET /health                    # Service health check
@@ -201,6 +209,14 @@ The Secrets Manager handles secure storage, rotation, and distribution of sensit
 - CI/CD pipeline integration
 - Audit logging and compliance
 - Role-based access control
+
+**Screenshots:**
+
+![Secrets Manager Interface](../demo/screenshots/secrets-manager-interface.png)
+*Secrets management interface showing encrypted storage and rotation schedules*
+
+![Secret Rotation Schedule](../demo/screenshots/secret-rotation-schedule.png)
+*Automated rotation schedule for database credentials and API keys*
 
 **API Endpoints:**
 ```bash
@@ -831,14 +847,3 @@ function measureSecurityPerformance(operation, startTime) {
 
 ---
 
-## 📄 License and Legal
-
-This security documentation is proprietary and confidential. Distribution is restricted to authorized personnel only.
-
-**Copyright © 2025 GamifyX Security Team. All rights reserved.**
-
----
-
-*Last updated: October 22, 2025*  
-*Next review: November 22, 2025*  
-*Document version: 1.0.0*
